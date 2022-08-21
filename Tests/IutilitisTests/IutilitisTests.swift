@@ -1,5 +1,5 @@
-import XCTest
 @testable import Iutilitis
+import XCTest
 
 final class IutilitisTests: XCTestCase {
     func testExample() throws {
