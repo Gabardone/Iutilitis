@@ -64,7 +64,10 @@ extension NSView: LayoutArea {
      constraints. Only the ones called for in the `edges` parameters will be used. By default on insets are applied.
      - Returns: An array with the generated constraints.
      */
-    func constraintsAgainstSuperviewEdges(_ edges: NSDirectionalRectEdge = .all, insets: NSDirectionalEdgeInsets = .zero) -> [NSLayoutConstraint] {
+    func constraintsAgainstSuperviewEdges(
+        _ edges: NSDirectionalRectEdge = .all,
+        insets: NSDirectionalEdgeInsets = .zero
+    ) -> [NSLayoutConstraint] {
         guard let superview = superview else {
             preconditionFailure("Attempted to create constraints against superview with no superview set.")
         }
@@ -80,11 +83,18 @@ extension NSView: LayoutArea {
      - Parameter offsets: Optional offsets to apply to the returned constraints. Default to zero.
      - Returns: An array with the generated constraints.
      */
-    func constraintsCenteringInSuperview(horizontalOffset: CGFloat = 0.0, verticalOffset: CGFloat = 0.0) -> [NSLayoutConstraint] {
+    func constraintsCenteringInSuperview(
+        horizontalOffset: CGFloat = 0.0,
+        verticalOffset: CGFloat = 0.0
+    ) -> [NSLayoutConstraint] {
         guard let superview = superview else {
             preconditionFailure("Attempted to create constraints against superview with no superview set.")
         }
 
-        return constraintsCenteringIn(layoutArea: superview, horizontalOffset: horizontalOffset, verticalOffset: verticalOffset)
+        return constraintsCenteringIn(
+            layoutArea: superview,
+            horizontalOffset: horizontalOffset,
+            verticalOffset: verticalOffset
+        )
     }
 }

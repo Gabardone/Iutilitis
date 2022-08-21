@@ -85,7 +85,7 @@ extension LayoutArea {
     ) -> [NSLayoutConstraint] {
         [
             centerXAnchor.constraint(equalTo: layoutArea.centerXAnchor, constant: horizontalOffset),
-            centerYAnchor.constraint(equalTo: layoutArea.centerYAnchor, constant: verticalOffset),
+            centerYAnchor.constraint(equalTo: layoutArea.centerYAnchor, constant: verticalOffset)
         ]
     }
 
@@ -100,7 +100,7 @@ extension LayoutArea {
     func constraints(forFixedSize size: CGSize) -> [NSLayoutConstraint] {
         [
             widthAnchor.constraint(equalToConstant: size.width),
-            heightAnchor.constraint(equalToConstant: size.height),
+            heightAnchor.constraint(equalToConstant: size.height)
         ]
     }
 }
