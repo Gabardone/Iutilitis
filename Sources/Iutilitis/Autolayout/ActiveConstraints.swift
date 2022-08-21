@@ -1,6 +1,6 @@
 //
 //  ActiveConstraints.swift
-//  
+//
 //
 //  Created by Óscar Morales Vivó on 8/20/22.
 //
@@ -27,7 +27,7 @@ struct ActiveConstraints {
 
     var wrappedValue: [NSLayoutConstraint] {
         get {
-            return constraints
+            constraints
         }
 
         set {

@@ -98,7 +98,7 @@ extension LayoutArea {
      - Returns: An array with the generated constraints.
      */
     func constraints(forFixedSize size: CGSize) -> [NSLayoutConstraint] {
-        return [
+        [
             widthAnchor.constraint(equalToConstant: size.width),
             heightAnchor.constraint(equalToConstant: size.height),
         ]

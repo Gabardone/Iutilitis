@@ -1,13 +1,13 @@
 //
 //  NSLayoutConstraint+Autolayout.swift
-//  
+//
 //
 //  Created by Óscar Morales Vivó on 8/20/22.
 //
 
 import Cocoa
 
-extension NSLayoutConstraint {
+public extension NSLayoutConstraint {
     /**
      Activates the calling constraint.
 
@@ -15,7 +15,7 @@ extension NSLayoutConstraint {
      - Returns: `self`
      */
     @discardableResult @inlinable
-    public func activate() -> Self {
+    func activate() -> Self {
         isActive = true
         return self
     }
@@ -27,7 +27,7 @@ extension NSLayoutConstraint {
      - Returns: `self`
      */
     @discardableResult @inlinable
-    public func deactivate() -> Self {
+    func deactivate() -> Self {
         isActive = false
         return self
     }
@@ -44,7 +44,7 @@ extension NSLayoutConstraint {
      - Returns: `self`
      */
     @discardableResult @inlinable
-    public func priority(_ priority: NSLayoutConstraint.Priority) -> Self {
+    func priority(_ priority: NSLayoutConstraint.Priority) -> Self {
         self.priority = priority
         return self
     }

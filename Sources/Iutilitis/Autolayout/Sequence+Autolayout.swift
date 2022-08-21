@@ -1,18 +1,18 @@
 //
 //  Sequence+Autolayout.swift
-//  
+//
 //
 //  Created by Óscar Morales Vivó on 8/20/22.
 //
 
 import Cocoa
 
-extension Sequence where Element == NSLayoutConstraint {
+public extension Sequence where Element == NSLayoutConstraint {
     /**
      Use this method for a more terse activation of an `Array` of layout constraint.
      */
     @inlinable
-    public func activate() {
+    func activate() {
         Array(self).activate()
     }
 
@@ -25,7 +25,7 @@ extension Sequence where Element == NSLayoutConstraint {
      - Returns: `self`, so it can be used as one of a series of chained calls.
      */
     @discardableResult @inlinable
-    public func priority(_ priority: NSLayoutConstraint.Priority) -> Self {
+    func priority(_ priority: NSLayoutConstraint.Priority) -> Self {
         for constraint in self {
             constraint.priority = priority
         }
