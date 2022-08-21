@@ -45,3 +45,8 @@ extension NSView {
         addSubview(view, positioned: place, relativeTo: otherView) // swiftlint:disable:this avoid_addsubview
     }
 }
+
+/**
+ NSView implements the `LayoutArea` protocol, but it still needs declaring in Swift.
+ */
+extension NSView: LayoutArea {}

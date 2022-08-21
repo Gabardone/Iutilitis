@@ -1,0 +1,14 @@
+included:
+  - Sources
+  - Tests
+
+custom_rules:
+  avoid_manually_disabling_TARMiC:
+    regex: 'translatesAutoresizingMaskIntoConstraints = false'
+    message: "Do not manually turn translatesAutoresizingMaskIntoConstraints off, use the managed view hierarchy methods add(subview:) and insert(subview:) instead"
+    match_kinds: identifier
+    
+  avoid_addsubview:
+    regex: 'addSubview\('
+    message: "Do not call `addSubview(...)` directly, use the `add(subview:...)` wrappers instead"
+    match_kinds: identifier
