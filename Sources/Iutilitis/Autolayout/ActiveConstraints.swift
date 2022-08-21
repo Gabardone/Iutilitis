@@ -22,10 +22,10 @@ import Cocoa
  change the layout engine's resolution.
  */
 @propertyWrapper
-struct ActiveConstraints {
+public struct ActiveConstraints {
     private var constraints: [NSLayoutConstraint]
 
-    var wrappedValue: [NSLayoutConstraint] {
+    public var wrappedValue: [NSLayoutConstraint] {
         get {
             constraints
         }
@@ -44,7 +44,7 @@ struct ActiveConstraints {
     /**
      Default initializer has an empty array as a default input parameter since most of the time we'll start empty.
      */
-    init(constraints: [NSLayoutConstraint] = []) {
+    public init(constraints: [NSLayoutConstraint] = []) {
         self.constraints = constraints
     }
 }

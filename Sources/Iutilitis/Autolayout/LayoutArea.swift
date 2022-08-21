@@ -16,7 +16,7 @@ import Cocoa
  where you actually need to explicitly layout on left/right instead of leading/trailing just use the raw auto layout
  API.
  */
-protocol LayoutArea {
+public protocol LayoutArea {
     var bottomAnchor: NSLayoutYAxisAnchor { get }
     var centerXAnchor: NSLayoutXAxisAnchor { get }
     var centerYAnchor: NSLayoutYAxisAnchor { get }
@@ -27,7 +27,7 @@ protocol LayoutArea {
     var widthAnchor: NSLayoutDimension { get }
 }
 
-extension LayoutArea {
+public extension LayoutArea {
     /**
      Returns constraints aligning the caller to another `LayoutArea`'s corresponding edges. Insets are applied as if
      the given `LayoutArea` is semantically enclosing the caller.

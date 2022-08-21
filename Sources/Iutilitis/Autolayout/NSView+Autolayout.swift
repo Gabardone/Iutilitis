@@ -49,7 +49,9 @@ extension NSView {
 /**
  NSView implements the `LayoutArea` protocol, but it still needs declaring in Swift.
  */
-extension NSView: LayoutArea {
+extension NSView: LayoutArea {}
+
+public extension NSView {
     /**
      Constraint generator for a view against its superview edges.
 

@@ -17,10 +17,10 @@ import Cocoa
  `NSView` subclass.
   */
 @propertyWrapper
-struct ActiveConstraint {
+public struct ActiveConstraint {
     private var constraint: NSLayoutConstraint?
 
-    var wrappedValue: NSLayoutConstraint? {
+    public var wrappedValue: NSLayoutConstraint? {
         get {
             constraint
         }
@@ -35,4 +35,6 @@ struct ActiveConstraint {
             constraint?.isActive = true
         }
     }
+
+    public init() {}
 }

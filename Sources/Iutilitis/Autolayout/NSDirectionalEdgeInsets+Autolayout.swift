@@ -7,6 +7,6 @@
 
 import Cocoa
 
-extension NSDirectionalEdgeInsets {
+public extension NSDirectionalEdgeInsets {
     static let zero = NSDirectionalEdgeInsets()
 }
