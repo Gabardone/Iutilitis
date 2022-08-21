@@ -7,7 +7,7 @@
 
 import Cocoa
 
-extension NSView {
+public extension NSView {
     /**
      Use instead of `addSubview(_:)` to add a subview to the caller's subview array.
 
