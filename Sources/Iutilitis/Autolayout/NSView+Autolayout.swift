@@ -49,4 +49,42 @@ extension NSView {
 /**
  NSView implements the `LayoutArea` protocol, but it still needs declaring in Swift.
  */
-extension NSView: LayoutArea {}
+extension NSView: LayoutArea {
+    /**
+     Constraint generator for a view against its superview edges.
+
+     The method will return an array of the constraints between the calling view and its superview edges with an
+     inset equal to that specified in the given directional edge insets.
+
+     For height/width constraints against superview, just use the regular width/height constraint anchor API.
+     - Precondition: The calling view must have a superview.
+     - Parameter edges: The edges against which we want to snap our view to its superview. By default the method
+     generates constraints in all directions.
+     - Parameter insets: The inset between the superview and the calling view to be applied in the returned
+     constraints. Only the ones called for in the `edges` parameters will be used. By default on insets are applied.
+     - Returns: An array with the generated constraints.
+     */
+    func constraintsAgainstSuperviewEdges(_ edges: NSDirectionalRectEdge = .all, insets: NSDirectionalEdgeInsets = .zero) -> [NSLayoutConstraint] {
+        guard let superview = superview else {
+            preconditionFailure("Attempted to create constraints against superview with no superview set.")
+        }
+
+        return constraintsAgainstEnclosing(layoutArea: superview, edges: edges, insets: insets)
+    }
+
+    /**
+     Constraint generator to center a view within its superview.
+
+     The returned constraints when activated will keep the caller centered within its superview.
+     - Precondition: The calling view must have a superview.
+     - Parameter offsets: Optional offsets to apply to the returned constraints. Default to zero.
+     - Returns: An array with the generated constraints.
+     */
+    func constraintsCenteringInSuperview(horizontalOffset: CGFloat = 0.0, verticalOffset: CGFloat = 0.0) -> [NSLayoutConstraint] {
+        guard let superview = superview else {
+            preconditionFailure("Attempted to create constraints against superview with no superview set.")
+        }
+
+        return constraintsCenteringIn(layoutArea: superview, horizontalOffset: horizontalOffset, verticalOffset: verticalOffset)
+    }
+}

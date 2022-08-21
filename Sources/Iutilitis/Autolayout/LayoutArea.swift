@@ -88,4 +88,19 @@ extension LayoutArea {
             centerYAnchor.constraint(equalTo: layoutArea.centerYAnchor, constant: verticalOffset),
         ]
     }
+
+    /**
+     Returns the constraints for a fixed size for the caller.
+
+     The returned constraints will fix the caller at the given size with a `.required` priority. Please avoid using
+     these if `intrinsicContentSize` and content compression/hugging priorities can do the work instead.
+     - Parameter size: The size we want the caller to maintain.
+     - Returns: An array with the generated constraints.
+     */
+    func constraints(forFixedSize size: CGSize) -> [NSLayoutConstraint] {
+        return [
+            widthAnchor.constraint(equalToConstant: size.width),
+            heightAnchor.constraint(equalToConstant: size.height),
+        ]
+    }
 }
