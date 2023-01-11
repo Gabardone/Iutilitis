@@ -40,5 +40,8 @@ public struct ActiveConstraint {
         }
     }
 
-    public init() {}
+    public init(constraint: NSLayoutConstraint? = nil) {
+        self.constraint = constraint
+        constraint?.isActive = true
+    }
 }
