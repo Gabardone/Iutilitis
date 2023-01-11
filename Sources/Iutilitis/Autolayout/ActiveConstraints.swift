@@ -50,5 +50,6 @@ public struct ActiveConstraints {
      */
     public init(constraints: [NSLayoutConstraint] = []) {
         self.constraints = constraints
+        constraints.activate()
     }
 }
