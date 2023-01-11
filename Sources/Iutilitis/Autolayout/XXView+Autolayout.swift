@@ -32,6 +32,17 @@
             subview.translatesAutoresizingMaskIntoConstraints = false // swiftlint:disable:this avoid_manually_disabling_TARMiC
             addSubview(subview, positioned: place, relativeTo: otherView) // swiftlint:disable:this avoid_addsubview
         }
+
+        /**
+         Wrapper for `layoutSubtreeIfNeeded` to use the UIKit name.
+
+         In this case the UIKit name is less confusing, although the methods don't act exactly the same on either
+         platforms. The differences, hoaever, seem to be only noticeable in contrived scenarios.
+         */
+        @inlinable
+        func layoutIfNeeded() {
+            layoutSubtreeIfNeeded()
+        }
     }
 
     public typealias XXView = NSView
