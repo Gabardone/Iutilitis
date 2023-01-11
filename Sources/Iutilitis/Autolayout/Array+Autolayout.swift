@@ -13,13 +13,24 @@
 
 public extension Array where Element == NSLayoutConstraint {
     /**
-     Use this method for a more terse activation of an `Array` of layout constraint.
+     Use this method for a more terse activation of an `Array` of layout constraints.
 
      It also returns `self` so it can be further chained or sent as a parameter to other methods.
      */
     @discardableResult @inlinable
     func activate() -> Self {
         NSLayoutConstraint.activate(self)
+        return self
+    }
+
+    /**
+     Use this method for a more terse deactivation of an `Array` of layout constraints.
+
+     It also returns `self` so it can be further chained or sent as a parameter to other methods.
+     */
+    @discardableResult @inlinable
+    func deactivate() -> Self {
+        NSLayoutConstraint.deactivate(self)
         return self
     }
 }

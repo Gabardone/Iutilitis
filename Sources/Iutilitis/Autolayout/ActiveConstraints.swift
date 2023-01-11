@@ -39,9 +39,9 @@ public struct ActiveConstraints {
                 return
             }
 
-            NSLayoutConstraint.deactivate(constraints)
+            constraints.deactivate()
             constraints = newValue
-            NSLayoutConstraint.activate(constraints)
+            constraints.activate()
         }
     }
 

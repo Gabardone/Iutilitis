@@ -13,11 +13,23 @@
 
 public extension Sequence where Element == NSLayoutConstraint {
     /**
-     Use this method for a more terse activation of an `Array` of layout constraint.
+     Use this method for a more terse activation of a non-array sequence of layout constraints.
      */
     @inlinable
     func activate() {
+        // Actually building up the array instead of iterating as activating all at once is more performant for the
+        // layout engine.
         Array(self).activate()
+    }
+
+    /**
+     Use this method for a more terse deactivation of a non-array sequence of layout constraints.
+     */
+    @inlinable
+    func deactivate() {
+        // Actually building up the array instead of iterating as activating all at once is more performant for the
+        // layout engine.
+        Array(self).deactivate()
     }
 
     /**
