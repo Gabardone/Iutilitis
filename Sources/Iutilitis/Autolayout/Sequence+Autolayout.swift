@@ -5,7 +5,11 @@
 //  Created by Óscar Morales Vivó on 8/20/22.
 //
 
-import Cocoa
+#if canImport(Cocoa)
+    import Cocoa
+#elseif canImport(UIKit)
+    import UIKit
+#endif
 
 public extension Sequence where Element == NSLayoutConstraint {
     /**
@@ -25,7 +29,7 @@ public extension Sequence where Element == NSLayoutConstraint {
      - Returns: `self`, so it can be used as one of a series of chained calls.
      */
     @discardableResult @inlinable
-    func priority(_ priority: NSLayoutConstraint.Priority) -> Self {
+    func priority(_ priority: XXLayoutPriority) -> Self {
         for constraint in self {
             constraint.priority = priority
         }

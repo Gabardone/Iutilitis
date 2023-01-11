@@ -5,7 +5,15 @@
 //  Created by Óscar Morales Vivó on 8/20/22.
 //
 
-import Cocoa
+#if canImport(Cocoa)
+    import Cocoa
+
+    public typealias XXLayoutPriority = NSLayoutConstraint.Priority
+#elseif canImport(UIKit)
+    import UIKit
+
+    public typealias XXLayoutPriority = UILayoutPriority
+#endif
 
 public extension NSLayoutConstraint {
     /**
@@ -44,7 +52,7 @@ public extension NSLayoutConstraint {
      - Returns: `self`
      */
     @discardableResult @inlinable
-    func priority(_ priority: NSLayoutConstraint.Priority) -> Self {
+    func priority(_ priority: XXLayoutPriority) -> Self {
         self.priority = priority
         return self
     }

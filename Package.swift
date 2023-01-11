@@ -6,6 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Iutilitis",
     platforms: [
+        .iOS(.v15),
         .macOS(.v11)
     ],
     products: [

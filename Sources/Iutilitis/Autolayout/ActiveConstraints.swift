@@ -5,7 +5,11 @@
 //  Created by Óscar Morales Vivó on 8/20/22.
 //
 
-import Cocoa
+#if canImport(Cocoa)
+    import Cocoa
+#elseif canImport(UIKit)
+    import UIKit
+#endif
 
 /**
  Property wrapper for a collection of active constraints.

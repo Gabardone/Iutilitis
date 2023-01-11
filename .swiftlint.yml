@@ -1,6 +1,19 @@
-included:
-  - Sources
-  - Tests
+identifier_name:
+  excluded: # excluded via string array, include xyz for geometry operations.
+    - id
+    - x
+    - y
+    - z
+
+line_length:
+  ignores_urls: true
+  ignores_interpolated_strings: true
+
+type_name:
+  allowed_symbols:
+    - "_"
+  excluded:
+    - ID
 
 custom_rules:
   avoid_manually_disabling_TARMiC:
@@ -11,4 +24,9 @@ custom_rules:
   avoid_addsubview:
     regex: 'addSubview\('
     message: "Do not call `addSubview(...)` directly, use the `add(subview:...)` wrappers instead"
+    match_kinds: identifier
+
+  avoid_insertsubview:
+    regex: 'insertSubview\('
+    message: "Do not call `insertSubview(...)` directly, use the `insert(subview:...)` wrappers instead"
     match_kinds: identifier

@@ -5,7 +5,11 @@
 //  Created by Óscar Morales Vivó on 8/20/22.
 //
 
-import Cocoa
+#if canImport(Cocoa)
+    import Cocoa
+#elseif canImport(UIKit)
+    import UIKit
+#endif
 
 /**
  While `NSView` and `NSLayoutGuide` both have the exact same layout anchor methods declared, the framework never

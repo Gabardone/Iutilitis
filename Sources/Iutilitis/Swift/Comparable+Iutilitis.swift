@@ -21,7 +21,7 @@ public extension Comparable {
     }
 }
 
-public extension Comparable where Self: Strideable {
+public extension Comparable where Self: Strideable & ExpressibleByIntegerLiteral {
     /**
      Clamps a value to a given range of the same type.
 
