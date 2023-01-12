@@ -15,7 +15,7 @@
  While `NSView` and `NSLayoutGuide` both have the exact same layout anchor methods declared, the framework never
  declared a common protocol that they both implement so you could pass one into methods requiring the other.
 
- This protocol allows us to do just that for our autolayout utilities.
+ This protocol allows us to do just that for our AutoLayout utilities.
  - Note: `leftAnchor` and `rightAnchor` are _very explicitly_ omitted here. If you hit one of the very rare cases
  where you actually need to explicitly layout on left/right instead of leading/trailing just use the raw auto layout
  API.

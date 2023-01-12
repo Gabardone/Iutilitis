@@ -1,5 +1,5 @@
 //
-//  NSLayoutGuide+Autolayout.swift
+//  XXLayoutGuide+AutoLayout.swift
 //
 //
 //  Created by Óscar Morales Vivó on 8/20/22.

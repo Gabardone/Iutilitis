@@ -1,5 +1,5 @@
 //
-//  NSView+Autolayout.swift
+//  XXView+AutoLayout.swift
 //
 //
 //  Created by Óscar Morales Vivó on 8/20/22.
@@ -19,13 +19,13 @@
 
          The method uses a short, nonspecific name as it's meant to be the default one to use, plus `insertArrangedSubview`
          was already taken.
-         - Parameter subview: The view to add at the end of the subview array, to be laid out using autolayout.
+         - Parameter subview: The view to add at the end of the subview array, to be laid out using AutoLayout.
          - Parameter place: Ordering of the subview relative to `otherView`. See the relevant documentation for
          `NSView.addSubview(_:positioned:relativeTo:)` for more information.
          - Parameter otherView: Existing subview relative to which `subview` will be inserted. If nil, the subview will
          be inserted at the top or bottom depending on the value of `place`. See the relevant documentation for
          `NSView.addSubview(_:positioned:relativeTo:)` for more information.
-         - Note: For standardized autolayout usage it's best to declare a linter rule that triggers whenever `addSubview` is
+         - Note: For standardized AutoLayout usage it's best to declare a linter rule that triggers whenever `addSubview` is
          used. The few cases where fully manual layout is warranted can turn the rule off.
          */
         func add(subview: XXView, positioned place: NSWindow.OrderingMode, relativeTo otherView: XXView?) {
@@ -59,10 +59,10 @@
 
          The method uses a short, nonspecific name as it's meant to be the default one to use, plus `insertArrangedSubview`
          was already taken.
-         - Parameter subview: The view to add at the end of the subview array, to be laid out using autolayout.
+         - Parameter subview: The view to add at the end of the subview array, to be laid out using AutoLayout.
          - Parameter index: The index within the subview array where `subview` will end. See the relevant documentation for
          `UIView.insertSubview(_:at:)` for more information.
-         - Note: For standardized autolayout usage it's best to declare a linter rule that triggers whenever `addSubview` is
+         - Note: For standardized AutoLayout usage it's best to declare a linter rule that triggers whenever `addSubview` is
          used. The few cases where fully manual layout is warranted can turn the rule off.
          */
         func insert(subview: UIView, at index: Int) {
@@ -81,10 +81,10 @@
          The method uses a short, nonspecific name as it's meant to be the default one to use, plus `insertArrangedSubview`
          was already taken.
          - Parameter subview: The view to insert at the specified position in the subview array, to be laid out using
-         autolayout.
+         AutoLayout.
          - Parameter aboveSubview: Existing subview above which `subview` should be inserted. Check the documentation of
          `UIView.insertSubview(_:aboveSubview:)` for more information.
-         - Note: For standardized autolayout usage it's best to declare a linter rule that triggers whenever `insertSubview`
+         - Note: For standardized AutoLayout usage it's best to declare a linter rule that triggers whenever `insertSubview`
          is used. The few cases where fully manual layout is warranted can turn the rule off.
          */
         func insert(subview: UIView, aboveSubview siblingSubview: UIView) {
@@ -103,10 +103,10 @@
          The method uses a short, nonspecific name as it's meant to be the default one to use, plus `insertArrangedSubview`
          was already taken.
          - Parameter subview: The view to insert at the specified position in the subview array, to be laid out using
-         autolayout.
+         AutoLayout.
          - Parameter belowSubview: Existing subview below which `subview` should be inserted. Check the documentation of
          `UIView.insertSubview(_:belowSubview:)` for more information.
-         - Note: For standardized autolayout usage it's best to declare a linter rule that triggers whenever `insertSubview`
+         - Note: For standardized AutoLayout usage it's best to declare a linter rule that triggers whenever `insertSubview`
          is used. The few cases where fully manual layout is warranted can turn the rule off.
          */
         func insert(subview: UIView, belowSubview siblingSubview: UIView) {
@@ -128,8 +128,8 @@ public extension XXView {
 
      The method uses a short, nonspecific name as it's meant to be the default one to use, plus `addArrangedSubview` was
      already taken.
-     - Parameter subview: The view to add at the end of the subview array, to be laid out using autolayout.
-     - Note: For standardized autolayout usage it's best to declare a linter rule that triggers whenever `addSubview` is
+     - Parameter subview: The view to add at the end of the subview array, to be laid out using AutoLayout.
+     - Note: For standardized AutoLayout usage it's best to declare a linter rule that triggers whenever `addSubview` is
      used. The few cases where fully manual layout is warranted can turn the rule off.
      */
     func add(subview: XXView) {

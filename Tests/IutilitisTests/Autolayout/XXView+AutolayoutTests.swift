@@ -1,5 +1,5 @@
 //
-//  XXView+AutolayoutTests.swift
+//  XXView+AutoLayoutTests.swift
 //
 //
 //  Created by Óscar Morales Vivó on 1/10/23.
@@ -8,7 +8,7 @@
 @testable import Iutilitis
 import XCTest
 
-final class XXViewAutolayoutTests: XCTestCase {
+final class XXViewAutoLayoutTests: XCTestCase {
     // Verifies the API contract for XXView.add(subview:)
     func testAddSubview() {
         let superview = XXView()

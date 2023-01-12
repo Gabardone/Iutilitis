@@ -1,5 +1,5 @@
 //
-//  NSLayoutConstraint+AutolayoutTests.swift
+//  NSLayoutConstraint+AutoLayoutTests.swift
 //
 //
 //  Created by Óscar Morales Vivó on 1/10/23.
@@ -8,7 +8,7 @@
 @testable import Iutilitis
 import XCTest
 
-final class NSLayoutConstraintAutolayoutTests: XCTestCase {
+final class NSLayoutConstraintAutoLayoutTests: XCTestCase {
     // Sanity check.
     func testPriorityOperation() {
         let view = XXView()

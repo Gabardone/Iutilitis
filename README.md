@@ -8,6 +8,6 @@ little to no adjustment.
 Not expected to see a particularly well organized update process. Things will be added to it as required by other work,
 tests will be added as desired to ensure stability of the utilities (and when humbled by various bugs).
 
-## Autolayout Utilities
+## AutoLayout Utilities
 
 Making life easier for developers by wrapping the most commonly used operations in utility methods.
