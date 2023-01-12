@@ -11,3 +11,8 @@ tests will be added as desired to ensure stability of the utilities (and when hu
 ## AutoLayout Utilities
 
 Making life easier for developers by wrapping the most commonly used operations in utility methods.
+
+## Dependency Injection
+
+A simple, low-friction pair of types to allow for dependency injection of global dependencies throughout an app's
+components. See the documentation comments in `Dependencies.swift` for how to use.
