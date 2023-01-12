@@ -1,7 +1,9 @@
 # file options
 
---swiftversion 5.6
+--swiftversion 5.7
 
 # Fix rules that conflict with swiftlint defaults.
 --commas inline # Swiftlint calls for no final comma on collections.
---ifdef noindent # No need to indent #ifdef blocks.
+--self init-only # Use explicit `self` in initializers
+--disable wrapMultilineStatementBraces # Not our preferred formatting, swiftlint complains.
+--ifdef noindent # Do not indent #ifdef blocks.

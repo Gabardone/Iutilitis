@@ -162,7 +162,7 @@ public extension XXView {
         _ edges: NSDirectionalRectEdge = .all,
         insets: NSDirectionalEdgeInsets = .zero
     ) -> [NSLayoutConstraint] {
-        guard let superview = superview else {
+        guard let superview else {
             preconditionFailure("Attempted to create constraints against superview with no superview set.")
         }
 
@@ -181,7 +181,7 @@ public extension XXView {
         horizontalOffset: CGFloat = 0.0,
         verticalOffset: CGFloat = 0.0
     ) -> [NSLayoutConstraint] {
-        guard let superview = superview else {
+        guard let superview else {
             preconditionFailure("Attempted to create constraints against superview with no superview set.")
         }
 

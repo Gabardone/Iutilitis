@@ -11,7 +11,7 @@ import Cocoa
 import UIKit
 #endif
 
-public extension Array where Element == NSLayoutConstraint {
+public extension [NSLayoutConstraint] {
     /**
      Use this method for a more terse activation of an `Array` of layout constraints.
 
