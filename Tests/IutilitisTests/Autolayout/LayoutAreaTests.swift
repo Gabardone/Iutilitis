@@ -28,11 +28,11 @@ final class LayoutAreaTests: XCTestCase {
 
         XCTAssertEqual(layoutGuide.frame.height, layoutGuideHeight)
         #if os(macOS)
-            // left-hand coordinate system.
-            XCTAssertEqual(layoutGuide.frame.minY - view.bounds.minY, insets.bottom)
+        // left-hand coordinate system.
+        XCTAssertEqual(layoutGuide.frame.minY - view.bounds.minY, insets.bottom)
         #elseif os(iOS)
-            // right-hand coordinate system.
-            XCTAssertEqual(view.bounds.maxY - layoutGuide.frame.maxY, insets.bottom)
+        // right-hand coordinate system.
+        XCTAssertEqual(view.bounds.maxY - layoutGuide.frame.maxY, insets.bottom)
         #endif
         // We don't want to bother with RTL right now so offset is same on both sides.
         XCTAssertEqual(view.bounds.maxX - layoutGuide.frame.maxX, insets.trailing)

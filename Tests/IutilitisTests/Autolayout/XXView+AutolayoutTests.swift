@@ -25,82 +25,82 @@ final class XXViewAutoLayoutTests: XCTestCase {
     }
 
     #if os(macOS)
-        // Verifies the API contract for NSView.add(subview:positioned:relativeTo:)
-        func testAddSubviewPositionedRelativeTo() {
-            let superview = NSView()
-            let middleSubview = NSView()
-            let bottomSubview = NSView()
-            let topSubview = NSView()
+    // Verifies the API contract for NSView.add(subview:positioned:relativeTo:)
+    func testAddSubviewPositionedRelativeTo() {
+        let superview = NSView()
+        let middleSubview = NSView()
+        let bottomSubview = NSView()
+        let topSubview = NSView()
 
-            superview.add(subview: topSubview)
-            superview.add(subview: bottomSubview, positioned: .below, relativeTo: nil)
-            superview.add(subview: middleSubview, positioned: .above, relativeTo: bottomSubview)
+        superview.add(subview: topSubview)
+        superview.add(subview: bottomSubview, positioned: .below, relativeTo: nil)
+        superview.add(subview: middleSubview, positioned: .above, relativeTo: bottomSubview)
 
-            XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertEqual(superview.subviews.first, bottomSubview)
-            XCTAssertEqual(superview.subviews[1], middleSubview)
-            XCTAssertEqual(superview.subviews.last, topSubview)
-        }
+        XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertEqual(superview.subviews.first, bottomSubview)
+        XCTAssertEqual(superview.subviews[1], middleSubview)
+        XCTAssertEqual(superview.subviews.last, topSubview)
+    }
     #endif
 
     #if os(iOS)
-        // Verifies the API contract for UIView.insert(subview:at:)
-        func testInsertSubviewAt() {
-            let superview = UIView()
-            let middleSubview = UIView()
-            let bottomSubview = UIView()
-            let topSubview = UIView()
+    // Verifies the API contract for UIView.insert(subview:at:)
+    func testInsertSubviewAt() {
+        let superview = UIView()
+        let middleSubview = UIView()
+        let bottomSubview = UIView()
+        let topSubview = UIView()
 
-            superview.add(subview: topSubview)
-            superview.insert(subview: bottomSubview, at: 0)
-            superview.insert(subview: middleSubview, at: 1)
+        superview.add(subview: topSubview)
+        superview.insert(subview: bottomSubview, at: 0)
+        superview.insert(subview: middleSubview, at: 1)
 
-            XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertEqual(superview.subviews.first, bottomSubview)
-            XCTAssertEqual(superview.subviews[1], middleSubview)
-            XCTAssertEqual(superview.subviews.last, topSubview)
-        }
+        XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertEqual(superview.subviews.first, bottomSubview)
+        XCTAssertEqual(superview.subviews[1], middleSubview)
+        XCTAssertEqual(superview.subviews.last, topSubview)
+    }
 
-        // Verifies the API contract for UIView.insert(subview:belowSubview:)
-        func testInsertSubviewBelowSubview() {
-            let superview = UIView()
-            let middleSubview = UIView()
-            let bottomSubview = UIView()
-            let topSubview = UIView()
+    // Verifies the API contract for UIView.insert(subview:belowSubview:)
+    func testInsertSubviewBelowSubview() {
+        let superview = UIView()
+        let middleSubview = UIView()
+        let bottomSubview = UIView()
+        let topSubview = UIView()
 
-            superview.add(subview: topSubview)
-            superview.insert(subview: bottomSubview, belowSubview: topSubview)
-            superview.insert(subview: middleSubview, belowSubview: topSubview)
+        superview.add(subview: topSubview)
+        superview.insert(subview: bottomSubview, belowSubview: topSubview)
+        superview.insert(subview: middleSubview, belowSubview: topSubview)
 
-            XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertEqual(superview.subviews.first, bottomSubview)
-            XCTAssertEqual(superview.subviews[1], middleSubview)
-            XCTAssertEqual(superview.subviews.last, topSubview)
-        }
+        XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertEqual(superview.subviews.first, bottomSubview)
+        XCTAssertEqual(superview.subviews[1], middleSubview)
+        XCTAssertEqual(superview.subviews.last, topSubview)
+    }
 
-        // Verifies the API contract for UIView.insert(subview:aboveSubview:)
-        func testInsertSubviewAboveSubview() {
-            let superview = UIView()
-            let middleSubview = UIView()
-            let bottomSubview = UIView()
-            let topSubview = UIView()
+    // Verifies the API contract for UIView.insert(subview:aboveSubview:)
+    func testInsertSubviewAboveSubview() {
+        let superview = UIView()
+        let middleSubview = UIView()
+        let bottomSubview = UIView()
+        let topSubview = UIView()
 
-            superview.add(subview: bottomSubview)
-            superview.insert(subview: topSubview, aboveSubview: bottomSubview)
-            superview.insert(subview: middleSubview, aboveSubview: bottomSubview)
+        superview.add(subview: bottomSubview)
+        superview.insert(subview: topSubview, aboveSubview: bottomSubview)
+        superview.insert(subview: middleSubview, aboveSubview: bottomSubview)
 
-            XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
-            XCTAssertEqual(superview.subviews.first, bottomSubview)
-            XCTAssertEqual(superview.subviews[1], middleSubview)
-            XCTAssertEqual(superview.subviews.last, topSubview)
-        }
+        XCTAssertFalse(topSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(bottomSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertFalse(middleSubview.translatesAutoresizingMaskIntoConstraints)
+        XCTAssertEqual(superview.subviews.first, bottomSubview)
+        XCTAssertEqual(superview.subviews[1], middleSubview)
+        XCTAssertEqual(superview.subviews.last, topSubview)
+    }
     #endif
 }

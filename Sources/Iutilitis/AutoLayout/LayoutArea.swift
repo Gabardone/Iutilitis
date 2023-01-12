@@ -6,9 +6,9 @@
 //
 
 #if canImport(Cocoa)
-    import Cocoa
+import Cocoa
 #elseif canImport(UIKit)
-    import UIKit
+import UIKit
 #endif
 
 /**

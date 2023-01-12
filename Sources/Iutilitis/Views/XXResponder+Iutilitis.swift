@@ -6,33 +6,33 @@
 //
 
 #if canImport(Cocoa)
-    import Cocoa
+import Cocoa
 
-    public extension NSResponder {
-        /**
-         Returns a sequence containing the responder chain starting at the calling instance.
-         - Returns A sequence starting with `self` whose elements form the responder chain from `self`.
-         */
-        func responderChain() -> some Sequence {
-            sequence(first: self, next: \.nextResponder)
-        }
+public extension NSResponder {
+    /**
+     Returns a sequence containing the responder chain starting at the calling instance.
+     - Returns A sequence starting with `self` whose elements form the responder chain from `self`.
+     */
+    func responderChain() -> some Sequence {
+        sequence(first: self, next: \.nextResponder)
     }
+}
 
-    typealias XXResponder = NSResponder
+typealias XXResponder = NSResponder
 #elseif canImport(UIKit)
-    import UIKit
+import UIKit
 
-    public extension UIResponder {
-        /**
-         Returns a sequence containing the responder chain starting at the calling instance.
-         - Returns A sequence starting with `self` whose elements form the responder chain from `self`.
-         */
-        func responderChain() -> some Sequence {
-            sequence(first: self, next: \.next)
-        }
+public extension UIResponder {
+    /**
+     Returns a sequence containing the responder chain starting at the calling instance.
+     - Returns A sequence starting with `self` whose elements form the responder chain from `self`.
+     */
+    func responderChain() -> some Sequence {
+        sequence(first: self, next: \.next)
     }
+}
 
-    typealias XXResponder = UIResponder
+typealias XXResponder = UIResponder
 #endif
 
 public extension XXResponder {
