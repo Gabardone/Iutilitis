@@ -29,7 +29,7 @@ private let controllerLogger = Logger(subsystem: Bundle.main.bundleIdentifier!, 
  - Todo: Consider building a controller manager (hard to do right with Swift's limitations on generics. May need to
  make them injectable).
  */
-class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableObject {
+open class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableObject {
     /**
      Designated initializer.
 
@@ -44,7 +44,7 @@ class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableObject
      - parameter modelProperty: Model property that this controller will manage. Immutable once set.
      - parameter initialValue: A safe initial value for the controller.
      */
-    required init<T: ModelProperty>(for id: ID, with modelProperty: T, initialValue: Model) where T.Model == Model {
+    public required init<T: ModelProperty>(for id: ID, with modelProperty: T, initialValue: Model) where T.Model == Model {
         self.id = id
         self.model = initialValue
         self.modelProperty = modelProperty
@@ -59,12 +59,12 @@ class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableObject
             .assign(to: &$model)
     }
 
-    typealias ID = ID
+    public typealias ID = ID
 
-    typealias Model = Model
+    public typealias Model = Model
 
     /// The controller's unique ID for the type.
-    let id: ID
+    public let id: ID
 
     /**
      The model value currently held by the controller.
@@ -79,7 +79,7 @@ class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableObject
      will receive updates before their parents have updated.
      */
     @Published
-    private(set) var model: Model
+    public private(set) var model: Model
 
     /**
      The model property that the controller is managing.
@@ -89,7 +89,7 @@ class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableObject
 
 // MARK: - Editing
 
-extension Controller {
+public extension Controller {
     /**
      The edit block type for a controller.
 
@@ -117,7 +117,7 @@ extension Controller {
 
 // MARK: - Controller Child management
 
-extension Controller {
+public extension Controller {
     /**
      Returns a managed child controller to whose model is the value at the given model's keypath.
 
@@ -160,7 +160,7 @@ extension Controller {
      - Returns: A controller whose model is the value at
      `model[keyPath: containerKeyPath][containerKey][keyPath: valueKeyPath]`.
      */
-    func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject>(
+    internal func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject>(
         forValueWithinKeyValueContainerAtKeyPath containerKeyPath: WritableKeyPath<Model, Container>,
         containerKey key: Container.Key,
         valueKeyPath: WritableKeyPath<Container.Value, Value>

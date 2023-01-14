@@ -18,7 +18,7 @@ import Foundation
  Hiding away the actual implementation allows a great deal of flexibility for testing as well as building up more
  complex model structures that can be controller piecemeal.
  */
-protocol ModelProperty<Model> {
+public protocol ModelProperty<Model> {
     /// The model type the property wraps.
     associatedtype Model: Equatable
 

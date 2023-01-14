@@ -17,8 +17,8 @@ import Foundation
  As the base storage for a model, it needs to be a reference type or its stored data will be duplicated around as
  other model properties inherit from it.
  */
-class RootModelProperty<T: Equatable> {
-    init(initialValue: Model) {
+public class RootModelProperty<T: Equatable> {
+    public init(initialValue: Model) {
         self.storage = initialValue
     }
 
@@ -35,18 +35,18 @@ class RootModelProperty<T: Equatable> {
 // MARK: - ModelProperty Implementation
 
 extension RootModelProperty: ModelProperty {
-    typealias Model = T
+    public typealias Model = T
 
-    var value: Model {
+    public var value: Model {
         storage
     }
 
-    var updatePublisher: UpdatePublisher {
+    public var updatePublisher: UpdatePublisher {
         // Gotta add the error to the publisher despite `RootModelProperty` never throwing them.
         subject.setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
-    func updateValue(to newValue: Model) {
+    public func updateValue(to newValue: Model) {
         // Just straight running the block works for a root
         if storage != newValue {
             storage = newValue
@@ -54,7 +54,7 @@ extension RootModelProperty: ModelProperty {
     }
 }
 
-extension Controller {
+public extension Controller {
     convenience init(for id: ID, with rootModelProperty: RootModelProperty<Model>) {
         self.init(for: id, with: rootModelProperty, initialValue: rootModelProperty.value)
     }

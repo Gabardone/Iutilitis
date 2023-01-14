@@ -14,7 +14,7 @@ import Foundation
  - Note: If you're using the `swift-collections` package, the `OrderedDictionary` type can also fulfill the protocol
  without any modification. It is not declared here as to avoid bringing in the dependency.
  */
-protocol KeyValueCollection {
+public protocol KeyValueCollection {
     associatedtype Key: Hashable
     associatedtype Value
 

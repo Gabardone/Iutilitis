@@ -14,7 +14,7 @@ import Foundation
  current purposes that is not an issue.
  - Todo: Investigate ways to lift the limitations above while keeping the API simple to use.
  */
-protocol ManagedObject: AnyObject {
+public protocol ManagedObject: AnyObject {
     associatedtype ID: Hashable
 
     static var manager: ObjectManager<ID, Self> { get }
@@ -30,8 +30,11 @@ protocol ManagedObject: AnyObject {
  `NSString` for use as the key for a `NSMapTable`
  - Todo: Lift the limitations on ID types once a better weak value container is found.
  */
-class ObjectManager<ID: Hashable, ObjectType: AnyObject> {
-    func controller(forID id: ID, builder: () throws -> ObjectType) rethrows -> ObjectType {
+public class ObjectManager<ID: Hashable, ObjectType: AnyObject> {
+    /// The default initializer is declared public.
+    public init() {}
+
+    public func controller(forID id: ID, builder: () throws -> ObjectType) rethrows -> ObjectType {
         let stringID = "\(id)" as NSString
         return try cache.object(forKey: stringID) ?? {
             let newController = try builder()
