@@ -82,9 +82,10 @@ open class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableO
     public private(set) var model: Model
 
     /**
-     The model property that the controller is managing.
+     The model property that the controller is managing. Accessed within the module to implement child controller
+     creation utilities, but don't access it directly otherwise.
      */
-    private var modelProperty: any ModelProperty<Model>
+    internal var modelProperty: any ModelProperty<Model>
 }
 
 // MARK: - Editing
@@ -112,115 +113,5 @@ public extension Controller {
     func apply(edit: Edit) throws {
         let newValue = try edit(modelProperty.value)
         try modelProperty.updateValue(to: newValue)
-    }
-}
-
-// MARK: - Controller Child management
-
-public extension Controller {
-    /**
-     Returns a managed child controller to whose model is the value at the given model's keypath.
-
-     This method works for controller types managed by a `ControllerManager` so you'll get the same one if it's already
-     been created and is being held by someone else.
-
-     The ID of the child view controller is assumed to be the same as the caller since the type should be the same.
-     - Todo: Revisit child controller ID assumptions if there's a need to manage child controllers for several different
-     keypaths pointing to different values of the same type.
-     - Parameter keyPath: A keypath pointing to the property we want a child controller for.
-     - Returns: a controller that manages the value at `keyPath` and will both update `self` if it gets edited and
-     rebroadcast updates to that value happening elsewhere.
-     */
-    func managedChildController<Value: Equatable, T: ManagedObject>(
-        forPropertyAtKeyPath keyPath: WritableKeyPath<Model, Value>
-    ) -> T where T: Controller<ID, Value>, T.ID == ID {
-        T.manager.controller(forID: id) {
-            T(
-                for: id,
-                with: KeyPathModelProperty(parent: modelProperty, keyPath: keyPath),
-                initialValue: model[keyPath: keyPath]
-            )
-        }
-    }
-
-    /**
-     Returns a managed child controller whose model is a value within a key value container within the calling
-     controller.
-
-     The method will return an existing controller for the value if found within its manager, or will build —and set up
-     within its type's manager— a new controller based on the currently held value.
-
-     The method may throw a `KeyValueModelProperty.ValueNotFoundError` if its container key points to no value
-     whatsoever.
-     - Parameter containerKeyPath: A key path from the model to a key value container within. Use `\.self` if the model
-     itself is the key value container.
-     - Parameter containerKey: The key to access within the key value container pointed at by `containerKeyPath`.
-     - Parameter valueKeyPath: The key path from the `container[containerKey]` to the actual value we want to control.
-     If the container value itself is what we want just use `\.self`.
-     - Returns: A controller whose model is the value at
-     `model[keyPath: containerKeyPath][containerKey][keyPath: valueKeyPath]`.
-     */
-    internal func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject>(
-        forValueWithinKeyValueContainerAtKeyPath containerKeyPath: WritableKeyPath<Model, Container>,
-        containerKey key: Container.Key,
-        valueKeyPath: WritableKeyPath<Container.Value, Value>
-    ) throws -> T where T: Controller<Container.Key, Value>, T.ID == Container.Key {
-        try T.manager.controller(forID: key) {
-            guard let initialValue = model[keyPath: containerKeyPath][key]?[keyPath: valueKeyPath] else {
-                // We can't safely create a controller without an initial value.
-                throw KeyValueModelProperty<Model, Container, Value>.ValueNotFoundError(key: key)
-            }
-
-            return T(
-                for: key,
-                with: KeyValueModelProperty(
-                    parent: modelProperty,
-                    containerKeyPath: containerKeyPath,
-                    key: key,
-                    valueKeyPath: valueKeyPath
-                ),
-                initialValue: initialValue
-            )
-        }
-    }
-
-    /**
-     Returns a managed child controller whose model is a value within a key value container within the calling
-     controller, or creates it otherwise.
-
-     The method will return an existing controller for the value if found within its manager, or will build —and set up
-     within its type's manager— a new controller based on the currently held value and given initial value.
-
-     Unlike the `initialValue`-less method, this will create a controller no matter what. The expectation is that its
-     key will be added to the parent key value storage soon enough. For example this may happen for hierarchical
-     controllers based on `@Published` key value storage properties as those emit to their subscribers _before_ their
-     actual value update.
-     - Parameter containerKeyPath: A key path from the model to a key value container within. Use `\.self` if the model
-     itself is the key value container.
-     - Parameter containerKey: The key to access within the key value container pointed at by `containerKeyPath`.
-     - Parameter valueKeyPath: The key path from the `container[containerKey]` to the actual value we want to control.
-     If the container value itself is what we want just use `\.self`.
-     - Parameter initialValue: The initial value for the controller if one has to be created from scratch.
-     - Returns: A controller whose model is the value at
-     `model[keyPath: containerKeyPath][containerKey][keyPath: valueKeyPath]`.
-     */
-    func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject>(
-        forValueWithinKeyValueContainerAtKeyPath containerKeyPath: WritableKeyPath<Model, Container>,
-        containerKey key: Container.Key,
-        valueKeyPath: WritableKeyPath<Container.Value, Value>,
-        initialValue: Value
-    ) -> T where T: Controller<Container.Key, Value>, T.ID == Container.Key {
-        T.manager.controller(forID: key) {
-            T(
-                for: key,
-                with: KeyValueModelProperty(
-                    parent: modelProperty,
-                    containerKeyPath: containerKeyPath,
-                    key: key,
-                    valueKeyPath: valueKeyPath
-                ),
-                initialValue: initialValue
-            )
-        }
     }
 }

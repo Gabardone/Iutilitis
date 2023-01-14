@@ -45,3 +45,32 @@ extension KeyPathModelProperty: ModelProperty {
         try parent.updateValue(to: parentValue)
     }
 }
+
+// MARK: - Controller Child management
+
+public extension Controller {
+    /**
+     Returns a managed child controller to whose model is the value at the given model's keypath.
+
+     This method works for controller types managed by a `ControllerManager` so you'll get the same one if it's already
+     been created and is being held by someone else.
+
+     The ID of the child view controller is assumed to be the same as the caller since the type should be the same.
+     - Todo: Revisit child controller ID assumptions if there's a need to manage child controllers for several different
+     keypaths pointing to different values of the same type.
+     - Parameter keyPath: A keypath pointing to the property we want a child controller for.
+     - Returns: a controller that manages the value at `keyPath` and will both update `self` if it gets edited and
+     rebroadcast updates to that value happening elsewhere.
+     */
+    func managedChildController<Value: Equatable, T: ManagedObject>(
+        forPropertyAtKeyPath keyPath: WritableKeyPath<Model, Value>
+    ) -> T where T: Controller<ID, Value>, T.ID == ID {
+        T.manager.controller(forID: id) {
+            T(
+                for: id,
+                with: KeyPathModelProperty(parent: modelProperty, keyPath: keyPath),
+                initialValue: model[keyPath: keyPath]
+            )
+        }
+    }
+}
