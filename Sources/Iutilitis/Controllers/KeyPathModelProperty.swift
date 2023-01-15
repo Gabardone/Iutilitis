@@ -62,14 +62,16 @@ public extension Controller {
      - Returns: a controller that manages the value at `keyPath` and will both update `self` if it gets edited and
      rebroadcast updates to that value happening elsewhere.
      */
-    func managedChildController<Value: Equatable, T: ManagedObject>(
-        forPropertyAtKeyPath keyPath: WritableKeyPath<Model, Value>
-    ) -> T where T: Controller<ID, Value>, T.ID == ID {
+    func managedChildController<Value: Equatable, T: ManagedObject, P>(
+        forPropertyAtKeyPath keyPath: WritableKeyPath<Model, Value>,
+        persistence: P
+    ) -> T where T: Controller<ID, Value, P>, T.ID == ID {
         T.manager.controller(forID: id) {
             T(
                 for: id,
                 with: KeyPathModelProperty(parent: modelProperty, keyPath: keyPath),
-                initialValue: model[keyPath: keyPath]
+                initialValue: model[keyPath: keyPath],
+                persistence: persistence
             )
         }
     }

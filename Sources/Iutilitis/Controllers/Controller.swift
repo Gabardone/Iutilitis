@@ -26,10 +26,14 @@ private let controllerLogger = Logger(subsystem: Bundle.main.bundleIdentifier!, 
  using reference types as there's nothing in the Swift language that prevents their contents from being modified outside
  the controller's scope.
 
+ `Persistence` is the type that will be used for persisting edits, fetching data and obtaining data updates. It's
+ left undetermined as the needs of various controllers vary wildly, but should almost always be a protocol type as to
+ allow for easy mocking in tests. Common functionality will be provided with adoptable protocols for those persistence
+ types that bring controller utilities via `extension Controller where Persistence: SomeProtocol`
  - Todo: Consider building a controller manager (hard to do right with Swift's limitations on generics. May need to
  make them injectable).
  */
-open class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableObject {
+open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable, ObservableObject {
     /**
      Designated initializer.
 
@@ -44,10 +48,16 @@ open class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableO
      - parameter modelProperty: Model property that this controller will manage. Immutable once set.
      - parameter initialValue: A safe initial value for the controller.
      */
-    public required init<T: ModelProperty>(for id: ID, with modelProperty: T, initialValue: Model) where T.Model == Model {
+    public required init<T: ModelProperty>(
+        for id: ID,
+        with modelProperty: T,
+        initialValue: Model,
+        persistence: Persistence
+    ) where T.Model == Model {
         self.id = id
         self.model = initialValue
         self.modelProperty = modelProperty
+        self.persistence = persistence
 
         // Make sure updates on the abstract model property reflect on the stored property. If there's an error
         // upstream we just stop updating since `@Published` doesn't support errors.
@@ -62,6 +72,8 @@ open class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableO
     public typealias ID = ID
 
     public typealias Model = Model
+
+    public typealias Persistence = Persistence
 
     /// The controller's unique ID for the type.
     public let id: ID
@@ -86,6 +98,13 @@ open class Controller<ID: Hashable, Model: Equatable>: Identifiable, ObservableO
      creation utilities, but don't access it directly otherwise.
      */
     internal var modelProperty: any ModelProperty<Model>
+
+    /**
+     The persistence used by the controller to persist edits and fetch data.
+
+     The property itself is inaccessibly by default, but is passed when running edit persistence blocks.
+     */
+    private let persistence: Persistence
 }
 
 // MARK: - Editing

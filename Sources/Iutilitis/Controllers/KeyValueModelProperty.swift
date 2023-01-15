@@ -161,11 +161,12 @@ public extension Controller {
      - Returns: A controller whose model is the value at
      `model[keyPath: containerKeyPath][containerKey][keyPath: valueKeyPath]`.
      */
-    internal func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject>(
+    internal func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject, P>(
         forValueWithinKeyValueContainerAtKeyPath containerKeyPath: WritableKeyPath<Model, Container>,
         containerKey key: Container.Key,
-        valueKeyPath: WritableKeyPath<Container.Value, Value>
-    ) throws -> T where T: Controller<Container.Key, Value>, T.ID == Container.Key {
+        valueKeyPath: WritableKeyPath<Container.Value, Value>,
+        persistence: P
+    ) throws -> T where T: Controller<Container.Key, Value, P>, T.ID == Container.Key {
         try T.manager.controller(forID: key) {
             guard let initialValue = model[keyPath: containerKeyPath][key]?[keyPath: valueKeyPath] else {
                 // We can't safely create a controller without an initial value.
@@ -180,7 +181,8 @@ public extension Controller {
                     key: key,
                     valueKeyPath: valueKeyPath
                 ),
-                initialValue: initialValue
+                initialValue: initialValue,
+                persistence: persistence
             )
         }
     }
@@ -205,12 +207,13 @@ public extension Controller {
      - Returns: A controller whose model is the value at
      `model[keyPath: containerKeyPath][containerKey][keyPath: valueKeyPath]`.
      */
-    func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject>(
+    func managedChildController<Container: KeyValueCollection, Value: Equatable, T: ManagedObject, P>(
         forValueWithinKeyValueContainerAtKeyPath containerKeyPath: WritableKeyPath<Model, Container>,
         containerKey key: Container.Key,
         valueKeyPath: WritableKeyPath<Container.Value, Value>,
-        initialValue: Value
-    ) -> T where T: Controller<Container.Key, Value>, T.ID == Container.Key {
+        initialValue: Value,
+        persistence: P
+    ) -> T where T: Controller<Container.Key, Value, P>, T.ID == Container.Key {
         T.manager.controller(forID: key) {
             T(
                 for: key,
@@ -220,7 +223,8 @@ public extension Controller {
                     key: key,
                     valueKeyPath: valueKeyPath
                 ),
-                initialValue: initialValue
+                initialValue: initialValue,
+                persistence: persistence
             )
         }
     }

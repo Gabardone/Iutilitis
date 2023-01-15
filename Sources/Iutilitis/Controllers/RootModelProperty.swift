@@ -55,7 +55,7 @@ extension RootModelProperty: ModelProperty {
 }
 
 public extension Controller {
-    convenience init(for id: ID, with rootModelProperty: RootModelProperty<Model>) {
-        self.init(for: id, with: rootModelProperty, initialValue: rootModelProperty.value)
+    convenience init(for id: ID, with rootModelProperty: RootModelProperty<Model>, persistence: Persistence) {
+        self.init(for: id, with: rootModelProperty, initialValue: rootModelProperty.value, persistence: persistence)
     }
 }
