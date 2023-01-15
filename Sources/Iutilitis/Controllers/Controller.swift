@@ -94,17 +94,18 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
     public private(set) var model: Model
 
     /**
+     The persistence used by the controller to persist edits and fetch data.
+
+     While it should _not_ be used from the outside, access is often needed to build up persistence for child
+     controllers. How that goes is dependent on the specific persistence implementation.
+     */
+    public let persistence: Persistence
+
+    /**
      The model property that the controller is managing. Accessed within the module to implement child controller
      creation utilities, but don't access it directly otherwise.
      */
     internal var modelProperty: any ModelProperty<Model>
-
-    /**
-     The persistence used by the controller to persist edits and fetch data.
-
-     The property itself is inaccessibly by default, but is passed when running edit persistence blocks.
-     */
-    private let persistence: Persistence
 }
 
 // MARK: - Editing
