@@ -30,6 +30,9 @@ private let controllerLogger = Logger(subsystem: Bundle.main.bundleIdentifier!, 
  left undetermined as the needs of various controllers vary wildly, but should almost always be a protocol type as to
  allow for easy mocking in tests. Common functionality will be provided with adoptable protocols for those persistence
  types that bring controller utilities via `extension Controller where Persistence: SomeProtocol`
+
+ In some cases (i.e. simple UI display of existing data) there's no need for a persistence type altogether. Use `Void`
+ to intantiate the controller type in those cases.
  - Todo: Consider building a controller manager (hard to do right with Swift's limitations on generics. May need to
  make them injectable).
  */
