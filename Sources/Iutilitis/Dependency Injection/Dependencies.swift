@@ -19,7 +19,7 @@ import Foundation
  - Declare a protocol that implements `Dependencies`, for consistency for `Sample` we should name it
  `SampleDependency`. It should look like the following:
  ```
- protocol SampleDependency {
+ protocol SampleDependency: Dependencies {
      var sample: Sample { get }
  }
  ```
