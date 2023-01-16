@@ -56,9 +56,9 @@ public extension Controller {
      been created and is being held by someone else.
 
      The ID of the child view controller is assumed to be the same as the caller since the type should be the same.
-     - Todo: Revisit child controller ID assumptions if there's a need to manage child controllers for several different
-     keypaths pointing to different values of the same type.
      - Parameter keyPath: A keypath pointing to the property we want a child controller for.
+     - Parameter persistence: The persistence to assing to the child controller. It's up to the surrounding logic to
+     procure one of the right type.
      - Returns: a controller that manages the value at `keyPath` and will both update `self` if it gets edited and
      rebroadcast updates to that value happening elsewhere.
      */
@@ -72,6 +72,35 @@ public extension Controller {
                 with: KeyPathModelProperty(parent: modelProperty, keyPath: keyPath),
                 initialValue: model[keyPath: keyPath],
                 persistence: persistence
+            )
+        }
+    }
+
+    /**
+     Returns a managed child controller to whose model is the value at the given model's keypath and which does no
+     persistence.
+
+     Most of the time child controllers that do no persistence will be the children of parent controllers that don't
+     do persistence, but exceptions may occur. Just make sure that your overall controller design works for your
+     purposes.
+
+     This method works for controller types managed by a `ControllerManager` so you'll get the same one if it's already
+     been created and is being held by someone else.
+
+     The ID of the child view controller is assumed to be the same as the caller since the type should be the same.
+     - Parameter keyPath: A keypath pointing to the property we want a child controller for.
+     - Returns: a controller that manages the value at `keyPath` and will both update `self` if it gets edited and
+     rebroadcast updates to that value happening elsewhere.
+     */
+    func managedChildController<Value: Equatable, T: ManagedObject>(
+        forPropertyAtKeyPath keyPath: WritableKeyPath<Model, Value>
+    ) -> T where T: Controller<ID, Value, Void>, T.ID == ID {
+        T.manager.controller(forID: id) {
+            T(
+                for: id,
+                with: KeyPathModelProperty(parent: modelProperty, keyPath: keyPath),
+                initialValue: model[keyPath: keyPath],
+                persistence: ()
             )
         }
     }

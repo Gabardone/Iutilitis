@@ -17,7 +17,7 @@ private let controllerLogger = Logger(subsystem: Bundle.main.bundleIdentifier!, 
 
  The model storage and update validation logic is abstract, hidden behind a protocol, which allows for flexibility
  building things like hierarchical controllers where you can for example build a controller for a part of a larger model
- (see `KeyPathModelProperty` for the most common child controller builder).
+ (see `KeyPathModelProperty` and `KeyValueModelProperty` for the most common child controller builders).
 
  An instance can be used to both feed SwiftUI views (therefore the compliance with `ObservableObject`) and UIKit ones
  through manual subscription to its model publisher.
@@ -33,8 +33,6 @@ private let controllerLogger = Logger(subsystem: Bundle.main.bundleIdentifier!, 
 
  In some cases (i.e. simple UI display of existing data) there's no need for a persistence type altogether. Use `Void`
  to intantiate the controller type in those cases.
- - Todo: Consider building a controller manager (hard to do right with Swift's limitations on generics. May need to
- make them injectable).
  */
 open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable, ObservableObject {
     /**
@@ -50,6 +48,7 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
      - parameter id: The id for the controller. It is immutable once set.
      - parameter modelProperty: Model property that this controller will manage. Immutable once set.
      - parameter initialValue: A safe initial value for the controller.
+     - parameter persistence: The persistence that the controller will use to persist and fetch its data.
      */
     public required init<T: ModelProperty>(
         for id: ID,
@@ -109,6 +108,26 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
      creation utilities, but don't access it directly otherwise.
      */
     internal var modelProperty: any ModelProperty<Model>
+}
+
+// MARK: - Convenience for non-persisting controllers
+
+public extension Controller where Persistence == Void {
+    /**
+     Convenience initializer for non-persisting controllers.
+
+     For controllers that don't do persistence, this convenience initializer takes care of hiding things for a more
+     straightforward experience.
+
+     All other parameters are the same as in the designated initializer.
+     */
+    convenience init<T: ModelProperty>(
+        for id: ID,
+        with modelProperty: T,
+        initialValue: Model
+    ) where T.Model == Model {
+        self.init(for: id, with: modelProperty, initialValue: initialValue, persistence: ())
+    }
 }
 
 // MARK: - Editing

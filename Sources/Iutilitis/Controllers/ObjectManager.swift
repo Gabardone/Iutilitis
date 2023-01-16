@@ -30,7 +30,7 @@ public protocol ManagedObject: AnyObject {
  `NSString` for use as the key for a `NSMapTable`
  - Todo: Lift the limitations on ID types once a better weak value container is found.
  */
-public class ObjectManager<ID: Hashable, ObjectType: AnyObject> {
+public final class ObjectManager<ID: Hashable, ObjectType: AnyObject> {
     /// The default initializer is declared public.
     public init() {}
 
