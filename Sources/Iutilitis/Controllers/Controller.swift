@@ -34,6 +34,7 @@ private let controllerLogger = Logger(subsystem: Bundle.main.bundleIdentifier!, 
  In some cases (i.e. simple UI display of existing data) there's no need for a persistence type altogether. Use `Void`
  to intantiate the controller type in those cases.
  */
+@MainActor
 open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable, ObservableObject {
     /**
      Designated initializer.
