@@ -23,7 +23,7 @@ public protocol ModelProperty<Model> {
     associatedtype Model: Equatable
 
     /// The current value of the model, accessible synchronously.
-    var value: Model { get throws }
+    var value: Model { get }
 
     /// Convenience `typealias` for the publisher used to broadcast value updates.
     typealias UpdatePublisher = AnyPublisher<Model, Error>

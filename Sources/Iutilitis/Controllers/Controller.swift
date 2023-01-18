@@ -48,17 +48,15 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
      parameter.
      - parameter id: The id for the controller. It is immutable once set.
      - parameter modelProperty: Model property that this controller will manage. Immutable once set.
-     - parameter initialValue: A safe initial value for the controller.
      - parameter persistence: The persistence that the controller will use to persist and fetch its data.
      */
     public required init<T: ModelProperty>(
         for id: ID,
         with modelProperty: T,
-        initialValue: Model,
         persistence: Persistence
     ) where T.Model == Model {
         self.id = id
-        self.model = initialValue
+        self.model = modelProperty.value
         self.modelProperty = modelProperty
         self.persistence = persistence
 
@@ -124,10 +122,9 @@ public extension Controller where Persistence == Void {
      */
     convenience init<T: ModelProperty>(
         for id: ID,
-        with modelProperty: T,
-        initialValue: Model
+        with modelProperty: T
     ) where T.Model == Model {
-        self.init(for: id, with: modelProperty, initialValue: initialValue, persistence: ())
+        self.init(for: id, with: modelProperty, persistence: ())
     }
 }
 

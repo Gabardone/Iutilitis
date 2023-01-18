@@ -27,9 +27,7 @@ extension KeyPathModelProperty: ModelProperty {
     typealias Model = Value
 
     var value: Value {
-        get throws {
-            try parent.value[keyPath: keyPath]
-        }
+        parent.value[keyPath: keyPath]
     }
 
     var updatePublisher: UpdatePublisher {
@@ -40,7 +38,7 @@ extension KeyPathModelProperty: ModelProperty {
     }
 
     mutating func updateValue(to newValue: Value) throws {
-        var parentValue = try parent.value
+        var parentValue = parent.value
         parentValue[keyPath: keyPath] = newValue
         try parent.updateValue(to: parentValue)
     }
@@ -70,7 +68,6 @@ public extension Controller {
             T(
                 for: id,
                 with: KeyPathModelProperty(parent: modelProperty, keyPath: keyPath),
-                initialValue: model[keyPath: keyPath],
                 persistence: persistence
             )
         }
@@ -99,7 +96,6 @@ public extension Controller {
             T(
                 for: id,
                 with: KeyPathModelProperty(parent: modelProperty, keyPath: keyPath),
-                initialValue: model[keyPath: keyPath],
                 persistence: ()
             )
         }

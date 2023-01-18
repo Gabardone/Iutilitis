@@ -37,8 +37,10 @@ extension Dictionary: KeyValueCollection {}
  Swift's support for keypath access to a type's data doesn't extend to digging into dictionaries and other key-value
  storage types, so this type is needed to bridge those gaps and deal with the possibility of a missing value for the
  given container key.
+
+ Due to the need to maintain and update internal state this cannot be a value type.
  */
-struct KeyValueModelProperty<Root: Equatable, Container: KeyValueCollection, Value: Equatable> {
+class KeyValueModelProperty<Root: Equatable, Container: KeyValueCollection, Value: Equatable> {
     typealias Key = Container.Key
 
     /**
@@ -71,24 +73,31 @@ struct KeyValueModelProperty<Root: Equatable, Container: KeyValueCollection, Val
     /// Keeps the subscription to the parent's `updatePublisher`. Optional so it can be captured into block during init.
     private var parentSubscription: AnyCancellable?
 
+    /// Keeps the last value updated in case the parent stops managing it.
+    private var lastValue: Value
+
     init(
         parent: any ModelProperty<Root>,
         containerKeyPath: WritableKeyPath<Root, Container>,
         key: Key,
-        valueKeyPath: WritableKeyPath<Container.Value, Value>
+        valueKeyPath: WritableKeyPath<Container.Value, Value>,
+        initialValue: Value
     ) {
         self.parent = parent
         self.containerKeyPath = containerKeyPath
         self.key = key
         self.valueKeyPath = valueKeyPath
+        self.lastValue = initialValue
         self.parentSubscription = parent.updatePublisher.sink(receiveCompletion: { [passthroughSubject] completion in
             passthroughSubject.send(completion: completion)
-        }, receiveValue: { [passthroughSubject, weak parentSubscription] value in
+        }, receiveValue: { [passthroughSubject, weak self] value in
+            guard let self else { return }
             if let result = value[keyPath: containerKeyPath][key]?[keyPath: valueKeyPath] {
+                self.lastValue = result
                 passthroughSubject.send(result)
             } else {
-                passthroughSubject.send(completion: .failure(ValueNotFoundError(key: key)))
-                parentSubscription?.cancel()
+                passthroughSubject.send(completion: .failure(ValueNotFoundInParentError(key: key)))
+                self.parentSubscription?.cancel()
             }
         })
     }
@@ -97,7 +106,7 @@ struct KeyValueModelProperty<Root: Equatable, Container: KeyValueCollection, Val
 extension KeyValueModelProperty: ModelProperty {
     typealias Model = Value
 
-    struct ValueNotFoundError: Error {
+    struct ValueNotFoundInParentError: Error {
         var key: Key
 
         var localizedDescription: String {
@@ -109,13 +118,12 @@ extension KeyValueModelProperty: ModelProperty {
      Access to the parent's value may throw if the parent is no longer holding on to it.
      */
     var value: Value {
-        get throws {
-            guard let result = try parent.value[keyPath: containerKeyPath][key] else {
-                throw ValueNotFoundError(key: key)
-            }
-
-            return result[keyPath: valueKeyPath]
+        guard let result = parent.value[keyPath: containerKeyPath][key] else {
+            // The value isn't being managed by the parent anymore.
+            return lastValue
         }
+
+        return result[keyPath: valueKeyPath]
     }
 
     /**
@@ -130,10 +138,12 @@ extension KeyValueModelProperty: ModelProperty {
      In addition to maybe throwing if the update of the parent cannot be completed, this method will throw if the
      managed value can no longer be found in the parent. We generally wouldn't want to set it otherwise.
      */
-    mutating func updateValue(to newValue: Value) throws {
-        var parentValue = try parent.value
+    func updateValue(to newValue: Value) throws {
+        var parentValue = parent.value
         guard var updatingValue = parentValue[keyPath: containerKeyPath][key] else {
-            throw ValueNotFoundError(key: key)
+            // Make the update local.
+            lastValue = newValue
+            throw ValueNotFoundInParentError(key: key)
         }
         updatingValue[keyPath: valueKeyPath] = newValue
         parentValue[keyPath: containerKeyPath][key] = updatingValue
@@ -172,7 +182,7 @@ public extension Controller {
         try T.manager.controller(forID: key) {
             guard let initialValue = model[keyPath: containerKeyPath][key]?[keyPath: valueKeyPath] else {
                 // We can't safely create a controller without an initial value.
-                throw KeyValueModelProperty<Model, Container, Value>.ValueNotFoundError(key: key)
+                throw KeyValueModelProperty<Model, Container, Value>.ValueNotFoundInParentError(key: key)
             }
 
             return T(
@@ -181,9 +191,9 @@ public extension Controller {
                     parent: modelProperty,
                     containerKeyPath: containerKeyPath,
                     key: key,
-                    valueKeyPath: valueKeyPath
+                    valueKeyPath: valueKeyPath,
+                    initialValue: initialValue
                 ),
-                initialValue: initialValue,
                 persistence: persistence
             )
         }
@@ -214,7 +224,7 @@ public extension Controller {
         try T.manager.controller(forID: key) {
             guard let initialValue = model[keyPath: containerKeyPath][key]?[keyPath: valueKeyPath] else {
                 // We can't safely create a controller without an initial value.
-                throw KeyValueModelProperty<Model, Container, Value>.ValueNotFoundError(key: key)
+                throw KeyValueModelProperty<Model, Container, Value>.ValueNotFoundInParentError(key: key)
             }
 
             return T(
@@ -223,9 +233,9 @@ public extension Controller {
                     parent: modelProperty,
                     containerKeyPath: containerKeyPath,
                     key: key,
-                    valueKeyPath: valueKeyPath
+                    valueKeyPath: valueKeyPath,
+                    initialValue: initialValue
                 ),
-                initialValue: initialValue,
                 persistence: ()
             )
         }
@@ -267,9 +277,9 @@ public extension Controller {
                     parent: modelProperty,
                     containerKeyPath: containerKeyPath,
                     key: key,
-                    valueKeyPath: valueKeyPath
+                    valueKeyPath: valueKeyPath,
+                    initialValue: initialValue
                 ),
-                initialValue: initialValue,
                 persistence: persistence
             )
         }
@@ -310,9 +320,9 @@ public extension Controller {
                     parent: modelProperty,
                     containerKeyPath: containerKeyPath,
                     key: key,
-                    valueKeyPath: valueKeyPath
+                    valueKeyPath: valueKeyPath,
+                    initialValue: initialValue
                 ),
-                initialValue: initialValue,
                 persistence: ()
             )
         }
