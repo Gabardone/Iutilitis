@@ -19,14 +19,23 @@ import Foundation
  */
 public final class RootModelProperty<T: Equatable> {
     public init(initialValue: Model) {
-        self.storage = initialValue
+        self.value = initialValue
     }
 
     private let subject = PassthroughSubject<Model, Never>()
 
-    private var storage: Model {
+    /**
+     The model property's `value` property is directly settable for root model properties. For simple setups where there
+     is no need to deal with validation concerns it allows for simply updating the data what controllers and subscribers
+     manage.
+     */
+    public var value: Model {
         didSet {
-            // Storage assignment is gated by an equality check so we don't need to repeat it here.
+            // Gate against equality updates.
+            guard value != oldValue else {
+                return
+            }
+
             subject.send(value)
         }
     }
@@ -37,19 +46,13 @@ public final class RootModelProperty<T: Equatable> {
 extension RootModelProperty: ModelProperty {
     public typealias Model = T
 
-    public var value: Model {
-        storage
-    }
-
     public var updatePublisher: UpdatePublisher {
         // Gotta add the error to the publisher despite `RootModelProperty` never throwing them.
-        subject.setFailureType(to: Error.self).eraseToAnyPublisher()
+        subject.eraseToAnyPublisher()
     }
 
     public func updateValue(to newValue: Model) {
-        // Just straight running the block works for a root
-        if storage != newValue {
-            storage = newValue
-        }
+        // Just a straight value update. The property itself does equality gating.
+        value = newValue
     }
 }

@@ -39,13 +39,8 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
     /**
      Designated initializer.
 
-     The designated initializer for a controller takes an id, a model property and an initial value for the model and
-     sets up the controller with them.
-
-     The initial value is requested because a model property does not guarantee successful access to its `value`,
-     otherwise this would need to be a `throw` initializer. If the model property is known to guarantee safe access to
-     its `value` (i.e. a `RootModelProperty`) then it's easy enough to just extract its `value` for the `initialValue`
-     parameter.
+     The designated initializer for a controller takes an id, a model property and a persistence value of the expected
+     type.
      - parameter id: The id for the controller. It is immutable once set.
      - parameter modelProperty: Model property that this controller will manage. Immutable once set.
      - parameter persistence: The persistence that the controller will use to persist and fetch its data.

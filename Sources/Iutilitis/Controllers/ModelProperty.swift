@@ -26,7 +26,7 @@ public protocol ModelProperty<Model> {
     var value: Model { get }
 
     /// Convenience `typealias` for the publisher used to broadcast value updates.
-    typealias UpdatePublisher = AnyPublisher<Model, Error>
+    typealias UpdatePublisher = AnyPublisher<Model, Never>
 
     /**
      A publisher that calls its subscribers when `value` changes, and _only_ when `value` changes.

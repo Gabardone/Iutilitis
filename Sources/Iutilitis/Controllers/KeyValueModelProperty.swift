@@ -31,14 +31,19 @@ extension Dictionary: KeyValueCollection {}
  contained in a key/value collection (i.e. a `Dictionary`).
 
  The model property has no say on what the parent does with its referred value so there's a chance that at some point
- it will not be there when accessed. For the precise behavior of this type when that happens see the documentation on
- the implementation of the `ModalProperty` methods for the type.
+ it will not be there when accessed. If that happens, the model property will keep returning the last value set as its
+ `value` but will fail any attempt at setting the value by throwing a `ValueNotFoundInParentError`. If the value
+ reappears again (say by an undo operation) the controller will resume fully working again.
+
+ Normally the above will only happen when a deletion happens so at that point the affected key value model property
+ will be on its way out. More sophisticated behaviors dependant on the above are not recommended as a clear case of
+ "trying to be too smart".
 
  Swift's support for keypath access to a type's data doesn't extend to digging into dictionaries and other key-value
  storage types, so this type is needed to bridge those gaps and deal with the possibility of a missing value for the
  given container key.
 
- Due to the need to maintain and update internal state this cannot be a value type.
+ Due to the need to maintain and update internal state (mostly `lastValue`) this cannot be a value type.
  */
 class KeyValueModelProperty<Root: Equatable, Container: KeyValueCollection, Value: Equatable> {
     typealias Key = Container.Key
@@ -67,11 +72,8 @@ class KeyValueModelProperty<Root: Equatable, Container: KeyValueCollection, Valu
      */
     let valueKeyPath: WritableKeyPath<Container.Value, Value>
 
-    /// We use this to vend as `updatePublisher` without having to `throw` whenever the data disappears from the parent.
-    private let passthroughSubject = PassthroughSubject<Value, Error>()
-
-    /// Keeps the subscription to the parent's `updatePublisher`. Optional so it can be captured into block during init.
-    private var parentSubscription: AnyCancellable?
+    /// We cache the publisher once (if) we build it so to avoid recreating it and making the copies do redundant work.
+    private var cachedUpdatePublisher: AnyPublisher<Value, Never>?
 
     /// Keeps the last value updated in case the parent stops managing it.
     private var lastValue: Value
@@ -88,18 +90,6 @@ class KeyValueModelProperty<Root: Equatable, Container: KeyValueCollection, Valu
         self.key = key
         self.valueKeyPath = valueKeyPath
         self.lastValue = initialValue
-        self.parentSubscription = parent.updatePublisher.sink(receiveCompletion: { [passthroughSubject] completion in
-            passthroughSubject.send(completion: completion)
-        }, receiveValue: { [passthroughSubject, weak self] value in
-            guard let self else { return }
-            if let result = value[keyPath: containerKeyPath][key]?[keyPath: valueKeyPath] {
-                self.lastValue = result
-                passthroughSubject.send(result)
-            } else {
-                passthroughSubject.send(completion: .failure(ValueNotFoundInParentError(key: key)))
-                self.parentSubscription?.cancel()
-            }
-        })
     }
 }
 
@@ -131,7 +121,18 @@ extension KeyValueModelProperty: ModelProperty {
      this model publisher is managing.
      */
     var updatePublisher: UpdatePublisher {
-        passthroughSubject.eraseToAnyPublisher()
+        cachedUpdatePublisher ?? {
+            // Build up the publisher.
+            let updatePublisher = parent.updatePublisher
+                .compactMap { [containerKeyPath, key, valueKeyPath] parentValue in
+                    parentValue[keyPath: containerKeyPath][key]?[keyPath: valueKeyPath]
+                }
+                .removeDuplicates()
+                .eraseToAnyPublisher()
+
+            self.cachedUpdatePublisher = updatePublisher
+            return updatePublisher
+        }()
     }
 
     /**
@@ -163,6 +164,9 @@ public extension Controller {
 
      The method may throw a `KeyValueModelProperty.ValueNotFoundError` if its container key points to no value
      whatsoever.
+     - Warning: The controllers are managed by type and key, so make sure you only use managed controllers if the keys
+     being used are unique within the context of the application. For example don't use an integer index as the key
+     unless you're 100% sure that there is only one set of controllers of the type for the whole app.
      - Parameter containerKeyPath: A key path from the model to a key value container within. Use `\.self` if the model
      itself is the key value container.
      - Parameter containerKey: The key to access within the key value container pointed at by `containerKeyPath`.
@@ -208,6 +212,9 @@ public extension Controller {
 
      The method may throw a `KeyValueModelProperty.ValueNotFoundError` if its container key points to no value
      whatsoever.
+     - Warning: The controllers are managed by type and key, so make sure you only use managed controllers if the keys
+     being used are unique within the context of the application. For example don't use an integer index as the key
+     unless you're 100% sure that there is only one set of controllers of the type for the whole app.
      - Parameter containerKeyPath: A key path from the model to a key value container within. Use `\.self` if the model
      itself is the key value container.
      - Parameter containerKey: The key to access within the key value container pointed at by `containerKeyPath`.
