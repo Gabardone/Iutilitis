@@ -45,11 +45,7 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
      - parameter modelProperty: Model property that this controller will manage. Immutable once set.
      - parameter persistence: The persistence that the controller will use to persist and fetch its data.
      */
-    public required init<T: ModelProperty>(
-        for id: ID,
-        with modelProperty: T,
-        persistence: Persistence
-    ) where T.Model == Model {
+    public required init(for id: ID, with modelProperty: ModelProperty<Model>, persistence: Persistence) {
         self.id = id
         self.model = modelProperty.value
         self.modelProperty = modelProperty
@@ -57,12 +53,7 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
 
         // Make sure updates on the abstract model property reflect on the stored property. If there's an error
         // upstream we just stop updating since `@Published` doesn't support errors.
-        modelProperty.updatePublisher
-            .catch { [weak self] error in
-                controllerLogger.error("Controller \(String(describing: self)) received update error from model property \(String(describing: modelProperty)). Error: \(error.localizedDescription)")
-                return Empty<Model, Never>()
-            }
-            .assign(to: &$model)
+        modelProperty.updatePublisher.assign(to: &$model)
     }
 
     public typealias ID = ID
@@ -101,7 +92,7 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
      The model property that the controller is managing. Accessed within the module to implement child controller
      creation utilities, but don't access it directly otherwise.
      */
-    internal var modelProperty: any ModelProperty<Model>
+    internal let modelProperty: ModelProperty<Model>
 }
 
 // MARK: - Convenience for non-persisting controllers
@@ -115,10 +106,7 @@ public extension Controller where Persistence == Void {
 
      All other parameters are the same as in the designated initializer.
      */
-    convenience init<T: ModelProperty>(
-        for id: ID,
-        with modelProperty: T
-    ) where T.Model == Model {
+    convenience init(for id: ID, with modelProperty: ModelProperty<Model>) {
         self.init(for: id, with: modelProperty, persistence: ())
     }
 }
@@ -147,6 +135,7 @@ public extension Controller {
      */
     func apply(edit: Edit) throws {
         let newValue = try edit(modelProperty.value)
-        try modelProperty.updateValue(to: newValue)
+        try modelProperty.validate(proposedValue: newValue)
+        modelProperty.updateValue(newValue)
     }
 }
