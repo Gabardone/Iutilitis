@@ -16,8 +16,8 @@ public protocol Validatable {
      etc.).
 
      The method isn't meant to offer a full diagnostic of what's wrong. If there's several things wrong with the
-     caller's state the method ought to nonetheless just throw the first one it finds. Callers shouldn't count on
-     validation order either.
+     caller's state the method ought to nonetheless just throw the first one it finds. Callers shouldn't count on the
+     order on various validation checks are done.
      */
     func validate() throws
 }
@@ -32,6 +32,15 @@ extension Validatable {
     }
 
     /**
+     Simple utility to check whether a value is valid without having to deal with `try/catch`.
+     */
+    @inlinable
+    var isValid: Bool {
+        // This looks a little weird but is valid and what we want.
+        (try? validate()) != nil
+    }
+
+    /**
      Simple assertion utility for `Validatable` types.
 
      Its behavior should be the same as `assert` and not execute any validation for release builds
@@ -39,6 +48,7 @@ extension Validatable {
      The method takes file and line parameters as to reflect the call site, not this utility, when a validation failure
      occurs. They should almost never need to be manually filled.
      */
+    @inlinable
     func assertValid(file: StaticString = #file, line: UInt = #line) {
         var validationError: (any Error)?
         assert(
