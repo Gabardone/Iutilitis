@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - ModelProperty Implementation
 
-extension ModelProperty {
+public extension ModelProperty {
     /**
      Builds and returns a model property for standalone model data.
 
@@ -21,7 +21,7 @@ extension ModelProperty {
      Keep in mind that while `ModelProperty` is a value type, it will act as a reference type if you copy one of these
      around as the stored value will be shared among all copies of the model property.
      */
-    public func rootModelProperty(initialValue: Model, validator: @escaping Validator = { _ in }) -> ModelProperty {
+    func rootModelProperty(initialValue: Model, validator: @escaping Validator<Model> = emptyValidator()) -> ModelProperty {
         let passthroughSubject = PassthroughSubject<Model, Never>()
         var value = initialValue
         return ModelProperty(
@@ -39,19 +39,5 @@ extension ModelProperty {
             },
             validator: validator
         )
-    }
-}
-
-extension ModelProperty where Model: Validatable {
-    /**
-     Builds and returns a model property for standalone validatable model data.
-
-     For validatable types we can default the validator of a root model property to just running the `validate` method
-     for the new value. If something more sophisticate is needed you can always fall back to the regular factory method.
-     */
-    public func rootModelProperty(initialValue: Model) -> ModelProperty {
-        return rootModelProperty(initialValue: initialValue) { newValue in
-            try newValue.validate()
-        }
     }
 }

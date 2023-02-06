@@ -89,10 +89,10 @@ open class Controller<ID: Hashable, Model: Equatable, Persistence>: Identifiable
     public let persistence: Persistence
 
     /**
-     The model property that the controller is managing. Accessed within the module to implement child controller
-     creation utilities, but don't access it directly otherwise.
+     The model property that the controller is managing. If using the validated or persisted APIs it shouldn't be
+     updated directly unless
      */
-    internal let modelProperty: ModelProperty<Model>
+    public let modelProperty: ModelProperty<Model>
 }
 
 // MARK: - Convenience for non-persisting controllers

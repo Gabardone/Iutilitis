@@ -9,19 +9,31 @@ import Combine
 import Foundation
 
 /**
- A wrapper for a property's full set of behaviors.
+ Validates a proposes value for the model property. The block should throw if the value would not be a valid one
+ to send to the model property's setter block.
 
- `ModelProperty` set ups are meant to be used to feed `Controller` instances, although the type may also be
- useful any time where there's need to abstract away the concept of a property more thoroughly than the various Swift
- language constructs for it —they all have some rough edges in practical use caused by historical or performance
- reasons—
+ Recoverability and value suggestions can be implemented through custom `Error` types.
 
- Most of the time these will be built up with the provided constructors and it is simple enough to compound or customize
- them for specific needs. Still a fully custom `ModelProperty` instance shouldn't be too hard to build when the provided
- ones don't fit a particular use case.
+ Any additional context needed for validation should be captured within the validator block.
+ */
+public typealias Validator<Model> = (Model) throws -> Void
+
+/**
+ A wrapper for a property's full set of behaviors including, optionally, validation.
+
+ `ModelProperty` set ups are meant to be used to feed `Controller` instances but they can also be used on their own
+ when you need an abstraction for a property and none of the ones in the library fulfills all your needs just right.
+
+ Most of the time these will be built up or composed with the provided factory constructors but building a custom one
+ for specific needs isn't particularly difficult.
+ - Note: Many of the composed model properties follow a parent-child relation, requiring references to an original
+ model property that holds the data that the "child" one extracts its own model from.
+
+ For these use cases strong references should follow the same direction as similar APIs i.e. Combine. As long as there
+ are no references from a parent model property to its children and only in the opposite direction reference cycles
+ should be avoided.
  */
 public struct ModelProperty<Model: Equatable> {
-
     // MARK: - Types
 
     /**
@@ -50,14 +62,6 @@ public struct ModelProperty<Model: Equatable> {
      */
     public typealias UpdatePublisher = AnyPublisher<Model, Never>
 
-    /**
-     Validates a proposes value for the model property. The block should throw if the value would not be a valid one
-     to send to the model property's setter block.
-
-     Recoverability and value suggestions can be implemented through custom `Error` types.
-     */
-    public typealias Validator = (Model) throws -> Void
-
     // MARK: - Initialization.
 
     /**
@@ -79,7 +83,7 @@ public struct ModelProperty<Model: Equatable> {
         updatePublisher: UpdatePublisher,
         getter: @escaping Getter,
         setter: @escaping Setter,
-        validator: @escaping Validator
+        validator: @escaping Validator<Model> = emptyValidator()
     ) {
         self.updatePublisher = updatePublisher
         self.getter = getter
@@ -98,11 +102,11 @@ public struct ModelProperty<Model: Equatable> {
      */
     public let updatePublisher: UpdatePublisher
 
-    private let getter: () -> Model
+    private let getter: Getter
 
-    private let setter: (Model) -> Void
+    private let setter: Setter
 
-    private let validator: (Model) throws -> Void
+    private let validator: Validator<Model>
 
     // MARK: - Public API
 
@@ -126,6 +130,14 @@ public struct ModelProperty<Model: Equatable> {
         setter(newValue)
     }
 
+    /**
+     Validates the proposed value as a valid one to send to `updateValue`
+
+     The method throws if validation fails. This allows the implementation flexibility when it comes to reporting
+     further information about why validation failed, as well as encapsulating other behaviors such as retry logic or
+     alternate value suggestions.
+     - Parameter proposedValue: A value. If the method doesn't throw, the value is a valid parameter for `updateValue`.
+     */
     public func validate(proposedValue: Model) throws {
         try validator(proposedValue)
     }
@@ -133,20 +145,20 @@ public struct ModelProperty<Model: Equatable> {
 
 // MARK: - Utilities
 
-extension ModelProperty {
+public extension ModelProperty {
     /**
      Returns an empty validator for the model property type that will let everything through.
 
      Use with care. Not a static property because Swift won't allow stored static properties on generic types.
      */
-    static func emptyValidator() -> Validator {
+    static func emptyValidator<T>() -> Validator<T> {
         { _ in }
     }
 }
 
 // MARK: - Validatable Utilities
 
-extension ModelProperty where Model: Validatable {
+public extension ModelProperty where Model: Validatable {
     /**
      Default model property setup for validatable model types.
 
@@ -157,7 +169,7 @@ extension ModelProperty where Model: Validatable {
      - Parameter setter: A block that sets the property to the given value. No validation performed, behavior undefined
      if the value is not valid.
      */
-    public init(
+    init(
         updatePublisher: UpdatePublisher,
         getter: @escaping Getter,
         setter: @escaping Setter

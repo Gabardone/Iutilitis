@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Óscar Morales Vivó on 2/1/23.
 //
@@ -18,27 +18,28 @@ extension ModelProperty {
      both for the getter and the update publisher.
      - Parameter updater: A block that generates a new value of the caller's model based on its current value and a new
      value for the mapped type. It needs not guard against equality.
-     - Parameter validator: A block that validates whether the results of updating the caller's model with a new
-     mapped value would be valid. For value types you can just run the setter block and validate the result, but for
-     reference types mode care is needed to avoid side effects.
+     - Parameter validator: A validator block. While the validator only takes in the child's mapped value, at the point
+     of creation it should be simple enough to capture the parent if needed for a more holistic validation. This
+     shouldn't cause reference cycles: The children capture the parent by design but the opposite should never happen.
      */
     func mappingModelProperty<Value>(
         map: @escaping (Model) -> Value,
         updater: @escaping (Model, Value) -> Model,
-        validator: @escaping (Model, Value) throws -> Void
+        validator: @escaping Validator<Value> = emptyValidator()
     ) -> ModelProperty<Value> {
-        return ModelProperty<Value>(
-            updatePublisher: updatePublisher.map(map).removeDuplicates().eraseToAnyPublisher()
-        ) {
-            map(value)
-        } setter: { newValue in
-            guard map(value) != newValue else {
-                return
-            }
+        ModelProperty<Value>(
+            updatePublisher: updatePublisher.map(map).removeDuplicates().eraseToAnyPublisher(),
+            getter: {
+                map(value)
+            },
+            setter: { newValue in
+                guard map(value) != newValue else {
+                    return
+                }
 
-            updateValue(updater(value, newValue))
-        } validator: { newValue in
-            try validator(value, newValue)
-        }
+                updateValue(updater(value, newValue))
+            },
+            validator: validator
+        )
     }
 }

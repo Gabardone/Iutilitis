@@ -80,7 +80,6 @@ struct ValidationError<T> {
     var reason: String?
 }
 
-
 extension ValidationError: Error {
     /**
      The `localizedDescription` implementation for `ValidationError` makes it unlikely to be useful for user display.
@@ -88,15 +87,15 @@ extension ValidationError: Error {
      */
     var localizedDescription: String {
         // TODO: Make localizable.
-        return "Validation failed for \(String(describing: invalidValue))." + (reason.map { " Reason: \($0)" } ?? "")
+        "Validation failed for \(String(describing: invalidValue))." + (reason.map { " Reason: \($0)" } ?? "")
     }
 }
 
 extension Validatable {
-    func validateProperty<Value: Validatable>(at keyPath: WritableKeyPath<Self, Value>) throws {
+    func validateProperty(at keyPath: WritableKeyPath<Self, some Validatable>) throws {
         do {
             try self[keyPath: keyPath].validate()
-        } catch let error {
+        } catch {
             throw ValidationError(
                 invalidValue: self[keyPath: keyPath],
                 reason: "Property \(keyPath) failed validation with error \(error)"
