@@ -14,9 +14,7 @@ import Foundation
  current purposes that is not an issue.
  - Todo: Investigate ways to lift the limitations above while keeping the API simple to use.
  */
-public protocol ManagedObject: AnyObject {
-    associatedtype ID: Hashable
-
+public protocol ManagedObject: AnyObject, Identifiable {
     static var manager: ObjectManager<ID, Self> { get }
 }
 
