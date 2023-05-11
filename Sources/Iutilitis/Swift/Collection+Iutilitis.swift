@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Óscar Morales Vivó on 4/3/23.
 //
@@ -18,7 +18,7 @@ public extension Optional where Wrapped: Collection {
      */
     @inlinable
     var hasContents: Bool {
-        return map { !$0.isEmpty } ?? false
+        map { !$0.isEmpty } ?? false
     }
 
     /**
@@ -32,6 +32,6 @@ public extension Optional where Wrapped: Collection {
      */
     @inlinable
     var contents: Wrapped? {
-        return flatMap { $0.isEmpty ? nil : $0 }
+        flatMap { $0.isEmpty ? nil : $0 }
     }
 }

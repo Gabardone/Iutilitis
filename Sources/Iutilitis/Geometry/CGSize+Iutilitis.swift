@@ -1,6 +1,6 @@
 //
 //  CGSize+Iutilitis.swift
-//  
+//
 //
 //  Created by Óscar Morales Vivó on 5/2/23.
 //
