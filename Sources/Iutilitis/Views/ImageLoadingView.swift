@@ -12,6 +12,7 @@ import UIKit
 /**
  A subclass of the framework's ImageView control that allows for async display of images.
  */
+@MainActor
 public class ImageLoadingView: UIImageView {
     override public init(frame: CGRect = .zero) {
         super.init(frame: frame)
@@ -66,6 +67,15 @@ public class ImageLoadingView: UIImageView {
 
     // MARK: - Async Image
 
+    /**
+     Loads an image using the provided block and sets it once it completes.
+
+     Manages display of activity and both empty and error placeholder displays.
+
+     The method checks at the end of the load operation to ensure that the image is not set if the view has been
+     reconfigured since using either `load(loadOperation:cancelOperation)` or `cancelLoad()` or the image has been set
+     since manually.
+     */
     public func load(loadOperation: @escaping LoadOperation, cancelOperation: CancelOperation? = nil) {
         // Start image loading from cache.
         imageLoadingIndicator.startAnimating()
@@ -74,60 +84,52 @@ public class ImageLoadingView: UIImageView {
         let imageLoader = ImageLoader(loadOperation: loadOperation, cancelOperation: cancelOperation)
         self.imageLoader = imageLoader
         Task { [imageLoader] in
-            defer {
-                // No matter how this ends the loading indicator goes away.
-                imageLoadingIndicator.stopAnimating()
-                self.imageLoader = nil
-            }
-
             do {
                 if let loadedImage = try await imageLoader.loadOperation() {
                     // Set image if it's still loading the same one.
+                    // If it's not the same we very specifically don't do anything as to not interfere with currently
+                    // displayed image or any further loading operation set.
                     if self.imageLoader === imageLoader {
-                        image = loadedImage
+                        finishLoadAndSet(image: loadedImage)
                     }
                 } else {
                     // No image returned. Just clear out.
-                    image = nil
+                    finishLoadAndSet(image: nil)
                 }
             } catch {
                 // Display an error placeholder.
-                displayErrorState()
+                finishLoadAndSet(image: nil, placeholder: Self.errorPlaceholderSymbolName)
             }
         }
     }
 
-    private func displayErrorState() {
-        imageLoader?.cancelOperation?()
-        imageLoader = nil
-
-        super.image = nil // Skip `willSet` & `didSet`
-
-        displayPlaceholder(name: Self.errorPlaceholderSymbolName)
-    }
-
-    private func displayPlaceholder(name: String) {
-        // Clear the image and hide the progress indicator if needed.
+    private func finishLoadAndSet(image: UIImage?, placeholder: String = emptyPlaceholderSymbolName) {
         imageLoadingIndicator.stopAnimating()
 
+        self.imageLoader = nil
+
+        super.image = image // Skip the overridden property setter.
+
         // Show the empty placeholder if needed.
-        placeholderImage.image = UIImage(systemName: name)
+        placeholderImage.image = UIImage(systemName: placeholder)
         placeholderImage.isHidden = image != nil
     }
 
     // MARK: - UIImageView Overrides
 
+    /**
+     Setting the image directly will cancel any ongoing load operation and display the new value, even if `nil` or the
+     same value that was being displayed.
+     */
     override public var image: UIImage? {
-        willSet {
-            guard let image, image != newValue else { return }
-
-            // Clean up the loading task info.
-            imageLoader?.cancelOperation?()
-            imageLoader = nil
+        get {
+            super.image
         }
 
-        didSet {
-            displayPlaceholder(name: Self.emptyPlaceholderSymbolName)
+        set {
+            // We're setting it directly so make sure we also cancel any ongoing loading.
+            imageLoader?.cancelOperation?()
+            finishLoadAndSet(image: newValue)
         }
     }
 }
