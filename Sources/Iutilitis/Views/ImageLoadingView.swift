@@ -73,8 +73,10 @@ public class ImageLoadingView: UIImageView {
      Manages display of activity and both empty and error placeholder displays.
 
      The method checks at the end of the load operation to ensure that the image is not set if the view has been
-     reconfigured since using either `load(loadOperation:cancelOperation)` or `cancelLoad()` or the image has been set
-     since manually.
+     reconfigured since using either `load(loadOperation:cancelOperation)` or by directly setting a different image.
+     - Parameter loadOperation: An asynchronous block that returns the image to display.
+     - Parameter cancelOperation: Optionally, a block to run if the loading is canceled before completion by setting
+     a different image directly.
      */
     public func load(loadOperation: @escaping LoadOperation, cancelOperation: CancelOperation? = nil) {
         // Start image loading from cache.
@@ -103,10 +105,20 @@ public class ImageLoadingView: UIImageView {
         }
     }
 
+    /**
+     If an ongoing image loading operation is ongoing, cancels it.
+
+     Otherwise leaves things untouched, but will clear the error state if set.
+     */
+    public func cancelLoad() {
+        imageLoader?.cancelOperation?()
+        finishLoadAndSet(image: super.image)
+    }
+
     private func finishLoadAndSet(image: UIImage?, placeholder: String = emptyPlaceholderSymbolName) {
         imageLoadingIndicator.stopAnimating()
 
-        self.imageLoader = nil
+        imageLoader = nil
 
         super.image = image // Skip the overridden property setter.
 
