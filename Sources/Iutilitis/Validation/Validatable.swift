@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Validatable.swift
 //  Teibolto Classic
 //
 //  Created by Óscar Morales Vivó on 12/8/22.
