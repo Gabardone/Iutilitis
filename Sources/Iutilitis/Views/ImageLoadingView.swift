@@ -87,20 +87,12 @@ public class ImageLoadingView: UIImageView {
         self.imageLoader = imageLoader
         Task { [imageLoader] in
             do {
-                if let loadedImage = try await imageLoader.loadOperation() {
-                    // Set image if it's still loading the same one.
-                    // If it's not the same we very specifically don't do anything as to not interfere with currently
-                    // displayed image or any further loading operation set.
-                    if self.imageLoader === imageLoader {
-                        finishLoadAndSet(image: loadedImage)
-                    }
-                } else {
-                    // No image returned. Just clear out.
-                    finishLoadAndSet(image: nil)
-                }
+                // Set the image to whatever the image loader returns (could be nothing).
+                // `finishLoadAndSet` will verify that the loader is the right one.
+                try await finishLoadAndSet(imageLoader: imageLoader, image: imageLoader.loadOperation())
             } catch {
                 // Display an error placeholder.
-                finishLoadAndSet(image: nil, placeholder: Self.errorPlaceholderSymbolName)
+                finishLoadAndSet(imageLoader: imageLoader, image: nil, placeholder: Self.errorPlaceholderSymbolName)
             }
         }
     }
@@ -112,13 +104,22 @@ public class ImageLoadingView: UIImageView {
      */
     public func cancelLoad() {
         imageLoader?.cancelOperation?()
-        finishLoadAndSet(image: super.image)
+        finishLoadAndSet(imageLoader: imageLoader, image: super.image)
     }
 
-    private func finishLoadAndSet(image: UIImage?, placeholder: String = emptyPlaceholderSymbolName) {
+    private func finishLoadAndSet(
+        imageLoader: ImageLoader?,
+        image: UIImage?,
+        placeholder: String = emptyPlaceholderSymbolName
+    ) {
+        guard imageLoader === self.imageLoader else {
+            // The loader is no longer what we're waiting for, so let's just nop away.
+            return
+        }
+
         imageLoadingIndicator.stopAnimating()
 
-        imageLoader = nil
+        self.imageLoader = nil
 
         super.image = image // Skip the overridden property setter.
 
@@ -141,7 +142,7 @@ public class ImageLoadingView: UIImageView {
         set {
             // We're setting it directly so make sure we also cancel any ongoing loading.
             imageLoader?.cancelOperation?()
-            finishLoadAndSet(image: newValue)
+            finishLoadAndSet(imageLoader: imageLoader, image: newValue)
         }
     }
 }
