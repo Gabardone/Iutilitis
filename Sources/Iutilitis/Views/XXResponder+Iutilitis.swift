@@ -5,21 +5,7 @@
 //  Created by Óscar Morales Vivó on 12/24/22.
 //
 
-#if canImport(Cocoa)
-import Cocoa
-
-public extension NSResponder {
-    /**
-     Returns a sequence containing the responder chain starting at the calling instance.
-     - Returns A sequence starting with `self` whose elements form the responder chain from `self`.
-     */
-    func responderChain() -> some Sequence {
-        sequence(first: self, next: \.nextResponder)
-    }
-}
-
-typealias XXResponder = NSResponder
-#elseif canImport(UIKit)
+#if canImport(UIKit)
 import UIKit
 
 public extension UIResponder {
@@ -33,6 +19,20 @@ public extension UIResponder {
 }
 
 typealias XXResponder = UIResponder
+#elseif canImport(Cocoa)
+import Cocoa
+
+public extension NSResponder {
+    /**
+     Returns a sequence containing the responder chain starting at the calling instance.
+     - Returns A sequence starting with `self` whose elements form the responder chain from `self`.
+     */
+    func responderChain() -> some Sequence {
+        sequence(first: self, next: \.nextResponder)
+    }
+}
+
+typealias XXResponder = NSResponder
 #endif
 
 public extension XXResponder {
