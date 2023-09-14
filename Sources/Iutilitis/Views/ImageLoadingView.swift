@@ -5,145 +5,224 @@
 //  Created by Óscar Morales Vivó on 5/10/23.
 //
 
-#if canImport(UIKit)
 import AutoLayoutHelpers
+#if canImport(UIKit)
 import UIKit
 
+public typealias XXActivityIndicator = UIActivityIndicator
+public typealias XXImage = UIImage
+public typealias XXImageView = UIImageView
+#elseif canImport(Cocoa)
+import Cocoa
+
+public typealias XXActivityIndicator = NSProgressIndicator
+public typealias XXImage = NSImage
+public typealias XXImageView = NSImageView
+#endif
+
 /**
- A subclass of the framework's ImageView control that allows for async display of images.
+ A subclass of the framework's ImageView control that allows for async loading and of images.
+
+ - Note: Because it's a generic class, it cannot be directly used in a .xib/.storyboard because Objective-C cannot
+ deal with Swift generic classes. If you have the need to do so, create a subclass of `ImageLoadingView<ID>` with the ID
+ type that you need and use that instead.
  */
 @MainActor
-public class ImageLoadingView: UIImageView {
-    override public init(frame: CGRect = .zero) {
-        super.init(frame: frame)
-
-        commonInit()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-
-        commonInit()
-    }
-
-    private func commonInit() {
-        // Add the progress indicator, centered.
-        add(subview: imageLoadingIndicator)
-        add(subview: placeholderImage)
-        (imageLoadingIndicator.constraintsCenteringInSuperview() + placeholderImage.constraintsCenteringInSuperview())
-            .activate()
+open class ImageLoadingView<ImageID: Hashable>: XXImageView {
+    deinit {
+        // Just in case something is running and we can save some work.
+        loadingTask?.cancel()
     }
 
     // MARK: - Types
 
-    public typealias LoadOperation = () async throws -> UIImage?
-
-    public typealias CancelOperation = () -> Void
-
-    private class ImageLoader {
-        init(loadOperation: @escaping LoadOperation, cancelOperation: CancelOperation? = nil) {
-            self.loadOperation = loadOperation
-            self.cancelOperation = cancelOperation
-        }
-
-        var loadOperation: LoadOperation
-
-        var cancelOperation: CancelOperation?
-    }
+    typealias Loader = (ImageID) async throws -> XXImage?
 
     // MARK: - Stored Properties
 
-    private static let emptyPlaceholderSymbolName = "photo.artframe"
+    public var imageID: ImageID? {
+        get {
+            currentImageID
+        }
 
-    private static let errorPlaceholderSymbolName = "xmark.diamond"
+        set {
+            guard imageID != newValue else {
+                return
+            }
 
-    private var loadingTask: Task<UIImage, Error>?
+            // Turn off ongoing task if any.
+            loadingTask?.cancel()
 
-    private let imageLoadingIndicator = UIActivityIndicatorView(style: .medium)
+            // Set the actual storage.
+            currentImageID = newValue
 
-    private let placeholderImage = UIImageView(image: UIImage(systemName: emptyPlaceholderSymbolName))
+            if let loader, let newValue {
+                // Set up the loading.
+                loadingTask = Task { [weak self, newValue] in
+                    // Weak self deliberately left weak so if things go away during loader's execution everything else
+                    // will not happen.
+                    do {
+                        if let image = try await loader(newValue) {
+                            // Everything worked, display the image.
+                            self?.display(image: image, imageID: newValue)
+                        } else {
+                            // No image found, display empty placeholder if set.
+                            self?.display(placeholderImage: self?.emptyPlaceholderImage, imageID: newValue)
+                        }
+                    } catch is CancellationError {
+                        // If things got canceled we just leave everything untouched, including loadingTask which is
+                        // probably superseded by another one by now.
+                        return
+                    } catch {
+                        // Set up the error placeholder if any.
+                        self?.display(placeholderImage: self?.errorPlaceholderImage, imageID: newValue)
+                    }
+                }
 
-    private var imageLoader: ImageLoader?
-
-    // MARK: - Async Image
-
-    /**
-     Loads an image using the provided block and sets it once it completes.
-
-     Manages display of activity and both empty and error placeholder displays.
-
-     The method checks at the end of the load operation to ensure that the image is not set if the view has been
-     reconfigured since using either `load(loadOperation:cancelOperation)` or by directly setting a different image.
-     - Parameter loadOperation: An asynchronous block that returns the image to display.
-     - Parameter cancelOperation: Optionally, a block to run if the loading is canceled before completion by setting
-     a different image directly.
-     */
-    public func load(loadOperation: @escaping LoadOperation, cancelOperation: CancelOperation? = nil) {
-        // Start image loading from cache.
-        imageLoadingIndicator.startAnimating()
-        placeholderImage.isHidden = true
-
-        let imageLoader = ImageLoader(loadOperation: loadOperation, cancelOperation: cancelOperation)
-        self.imageLoader = imageLoader
-        Task { [imageLoader] in
-            do {
-                // Set the image to whatever the image loader returns (could be nothing).
-                // `finishLoadAndSet` will verify that the loader is the right one.
-                try await finishLoadAndSet(imageLoader: imageLoader, image: imageLoader.loadOperation())
-            } catch {
-                // Display an error placeholder.
-                finishLoadAndSet(imageLoader: imageLoader, image: nil, placeholder: Self.errorPlaceholderSymbolName)
+                // Set up loading UI.
+                ensureSpinner().startAnimation(nil)
+            } else {
+                // Just leave it blank.
+                imageLoadingIndicator?.stopAnimation(nil)
+                placeholderImageView?.isHidden = true
+                super.image = nil
             }
         }
     }
 
     /**
-     If an ongoing image loading operation is ongoing, cancels it.
+     If set, it will be displayed when the image view is empty.
 
-     Otherwise leaves things untouched, but will clear the error state if set.
+     This will display as a placeholder when `nil` is set for its loading ID, the loading operation is `nil` or the
+     loading operation returns `nil` for a given ID.
+
+     The image will be displayed at its original size.
      */
-    public func cancelLoad() {
-        imageLoader?.cancelOperation?()
-        finishLoadAndSet(imageLoader: imageLoader, image: super.image)
-    }
+    public var emptyPlaceholderImage: XXImage?
 
-    private func finishLoadAndSet(
-        imageLoader: ImageLoader?,
-        image: UIImage?,
-        placeholder: String = emptyPlaceholderSymbolName
-    ) {
-        guard imageLoader === self.imageLoader else {
-            // The loader is no longer what we're waiting for, so let's just nop away.
-            return
-        }
+    /**
+     If set, it will be displayed when the image for a given ID fails to load.
 
-        imageLoadingIndicator.stopAnimating()
+     This will display as a placeholder when the load operation throws an exception.
 
-        self.imageLoader = nil
+     The image will be displayed at its original size.
+     */
+    public var errorPlaceholderImage: XXImage?
 
-        super.image = image // Skip the overridden property setter.
+    /**
+     The loading logic.
 
-        // Show the empty placeholder if needed.
-        placeholderImage.image = UIImage(systemName: placeholder)
-        placeholderImage.isHidden = image != nil
-    }
+     The loader takes an imageID when set and attempts to load the image asynchronously. The loader will be wrapped in
+     a `Task` so it should be able to use `Task` cancelation facilities to optimize work when a loading operation is no
+     longer needed (the `Task` will be canceled when that happens).
+     */
+    var loader: Loader?
 
-    // MARK: - UIImageView Overrides
+    private var currentImageID: ImageID?
+
+    private var imageLoadingIndicator: XXActivityIndicator?
+
+    private var placeholderImageView: XXImageView?
+
+    private var loadingTask: Task<Void, Error>?
+
+    // MARK: - XXImageView Overrides
 
     /**
      Setting the image directly will cancel any ongoing load operation and display the new value, even if `nil` or the
      same value that was being displayed.
      */
-    override public var image: UIImage? {
+    override public var image: XXImage? {
         get {
             super.image
         }
 
         set {
             // We're setting it directly so make sure we also cancel any ongoing loading.
-            imageLoader?.cancelOperation?()
-            finishLoadAndSet(imageLoader: imageLoader, image: newValue)
+            imageID = nil
+            loadingTask?.cancel()
+            loadingTask = nil
+
+            super.image = newValue
         }
     }
 }
-#endif
+
+// MARK: - Setup Utilities
+
+extension ImageLoadingView {
+    func ensureSpinner() -> XXActivityIndicator {
+        if let imageLoadingIndicator {
+            return imageLoadingIndicator
+        }
+
+        // Gotta build it.
+        let imageLoadingIndicator: XXActivityIndicator
+
+        #if canImport(UIKit)
+        // Configure UIKit
+        imageLoadingIndicator = XXActivityIndicator(style: .medium)
+        #elseif canImport(Cocoa)
+        // Configure AppKit
+        imageLoadingIndicator = XXActivityIndicator()
+        imageLoadingIndicator.style = .spinning
+        imageLoadingIndicator.isIndeterminate = true
+        #endif
+
+        // Store it for the next time.
+        self.imageLoadingIndicator = imageLoadingIndicator
+
+        // Add to view hierarchy and layout.
+        add(subview: imageLoadingIndicator)
+        NSLayoutConstraint.activate(imageLoadingIndicator.constraintsCenteringInSuperview())
+
+        // We're good!
+        return imageLoadingIndicator
+    }
+
+    func display(image: XXImage?, imageID: ImageID) {
+        guard imageID == currentImageID else {
+            // Stuff changed since we started loading the image. Let's walk back into the bushes.
+            return
+        }
+
+        // Hide the rest of the stuff.
+        placeholderImageView?.isHidden = true
+        imageLoadingIndicator?.stopAnimation(nil)
+
+        // Actually display.
+        super.image = image
+    }
+
+    func display(placeholderImage: XXImage?, imageID: ImageID) {
+        guard imageID == currentImageID else {
+            // Stuff changed since we started loading the image. Let's walk back into the bushes.
+            return
+        }
+
+        // Make sure the rest of the stuff isn't showing.
+        super.image = nil
+        imageLoadingIndicator?.stopAnimation(nil)
+
+        guard let placeholderImage else {
+            return
+        }
+
+        // Need to ensure the placeholder image view exists, then put the placeholder in.
+        let placeholderImageView = placeholderImageView ?? {
+            let placeholderImageView = XXImageView()
+
+            // Store it for the next time.
+            self.placeholderImageView = placeholderImageView
+
+            // Add to view hierarchy and layout.
+            add(subview: placeholderImageView)
+            NSLayoutConstraint.activate(placeholderImageView.constraintsCenteringInSuperview())
+
+            return placeholderImageView
+        }()
+
+        placeholderImageView.image = placeholderImage
+        placeholderImageView.isHidden = false
+    }
+}
