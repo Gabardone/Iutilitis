@@ -1,6 +1,6 @@
 //
 //  Validatable.swift
-//  Teibolto Classic
+//  Iutilitis
 //
 //  Created by Óscar Morales Vivó on 12/8/22.
 //
@@ -74,10 +74,15 @@ extension Validatable {
  There is no imperative to use this type when throwing errors during validation, but it makes for an easy throw if
  nothing more specific is forthcoming.
  */
-struct ValidationError<T> {
-    var invalidValue: T
+public struct ValidationError<T> {
+    public var invalidValue: T
 
-    var reason: String?
+    public var reason: String?
+
+    public init(invalidValue: T, reason: String?) {
+        self.invalidValue = invalidValue
+        self.reason = reason
+    }
 }
 
 extension ValidationError: Error {
