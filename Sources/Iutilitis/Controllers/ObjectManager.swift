@@ -1,6 +1,6 @@
 //
 //  ControllerManager.swift
-//  Teibolto Classic
+//  Iutilitis
 //
 //  Created by Óscar Morales Vivó on 12/30/22.
 //
@@ -32,10 +32,10 @@ public final class ObjectManager<ID: Hashable, ObjectType: AnyObject> {
     /// The default initializer is declared public.
     public init() {}
 
-    public func controller(forID id: ID, builder: () throws -> ObjectType) rethrows -> ObjectType {
+    public func controller(forID id: ID, builder: (ID) throws -> ObjectType) rethrows -> ObjectType {
         let stringID = "\(id)" as NSString
         return try cache.object(forKey: stringID) ?? {
-            let newController = try builder()
+            let newController = try builder(id)
             cache.setObject(newController, forKey: stringID)
             return newController
         }()
