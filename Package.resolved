@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Gabardone/AutoLayoutHelpers",
       "state" : {
-        "revision" : "26797e09f404cbdb34c1b7c3d809c90ad0c09356",
-        "version" : "1.1.2"
+        "revision" : "45989dc5b65c6ab34f40beaf3cf1f8fb991d0730",
+        "version" : "1.2.2"
       }
     }
   ],

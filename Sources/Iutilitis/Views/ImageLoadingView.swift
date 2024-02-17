@@ -9,7 +9,7 @@ import AutoLayoutHelpers
 #if canImport(UIKit)
 import UIKit
 
-public typealias XXActivityIndicator = UIActivityIndicator
+public typealias XXActivityIndicator = UIActivityIndicatorView
 public typealias XXImage = UIImage
 public typealias XXImageView = UIImageView
 #elseif canImport(Cocoa)
@@ -18,6 +18,16 @@ import Cocoa
 public typealias XXActivityIndicator = NSProgressIndicator
 public typealias XXImage = NSImage
 public typealias XXImageView = NSImageView
+
+extension XXActivityIndicator {
+    func startAnimating() {
+        startAnimation(nil)
+    }
+
+    func stopAnimating() {
+        stopAnimation(nil)
+    }
+}
 #endif
 
 /**
@@ -80,10 +90,10 @@ open class ImageLoadingView<ImageID: Hashable>: XXImageView {
                 }
 
                 // Set up loading UI.
-                ensureSpinner().startAnimation(nil)
+                ensureSpinner().startAnimating()
             } else {
                 // Just leave it blank.
-                imageLoadingIndicator?.stopAnimation(nil)
+                imageLoadingIndicator?.stopAnimating()
                 placeholderImageView?.isHidden = true
                 super.image = nil
             }
@@ -188,7 +198,7 @@ extension ImageLoadingView {
 
         // Hide the rest of the stuff.
         placeholderImageView?.isHidden = true
-        imageLoadingIndicator?.stopAnimation(nil)
+        imageLoadingIndicator?.stopAnimating()
 
         // Actually display.
         super.image = image
@@ -202,7 +212,7 @@ extension ImageLoadingView {
 
         // Make sure the rest of the stuff isn't showing.
         super.image = nil
-        imageLoadingIndicator?.stopAnimation(nil)
+        imageLoadingIndicator?.stopAnimating()
 
         guard let placeholderImage else {
             return

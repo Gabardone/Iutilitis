@@ -5,7 +5,7 @@
 //  Created by Óscar Morales Vivó on 8/21/22.
 //
 
-#if canImport(Cocoa)
+#if os(macOS)
 import Cocoa
 
 /**
